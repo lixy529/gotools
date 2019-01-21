@@ -1,8 +1,3 @@
-// rsa加解密相关函数
-// 参考：https://github.com/caobohua/ostar
-// 部分函数直接从crypto/rsa复制修改
-//   变更历史
-//     2017-02-20  lixiaoya  新建
 package utils
 
 import (
@@ -22,8 +17,8 @@ var (
 	ErrKeyPairDismatch = errors.New("data is not encrypted by the private key")
 )
 
-// EncPKCS1v15 Ras私钥加密
-// 根据SignPKCS1v15函数进行修改
+// EncPKCS1v15 decode by ras private key.
+// Modify according to the SignPKCS1v15 function.
 func EncPKCS1v15(rand io.Reader, priv *rsa.PrivateKey, hashed []byte) ([]byte, error) {
 	tLen := len(hashed)
 	k := (priv.N.BitLen() + 7) / 8
@@ -49,9 +44,9 @@ func EncPKCS1v15(rand io.Reader, priv *rsa.PrivateKey, hashed []byte) ([]byte, e
 	return em, nil
 }
 
-// DecPKCS1v15 Ras公钥加密
-// 根据VerifyPKCS1v15函数进行修改
-// 参考 https://github.com/caobohua/ostar
+// DecPKCS1v15 encode by ras public key
+// Modify according to the VerifyPKCS1v15 function.
+// reference: https://github.com/caobohua/ostar .
 func DecPKCS1v15(pub *rsa.PublicKey, data []byte) ([]byte, error) {
 	k := (pub.N.BitLen() + 7) / 8
 	if k != len(data) {
@@ -84,7 +79,7 @@ func DecPKCS1v15(pub *rsa.PublicKey, data []byte) ([]byte, error) {
 
 // modInverse returns ia, the inverse of a in the multiplicative group of prime
 // order n. It requires that a be a member of the group (i.e. less than n).
-// 从crypto/rsa复制
+// Copy from crypto/rsa.
 func modInverse(a, n *big.Int) (ia *big.Int, ok bool) {
 	g := new(big.Int)
 	x := new(big.Int)
@@ -109,7 +104,7 @@ func modInverse(a, n *big.Int) (ia *big.Int, ok bool) {
 
 // decrypt performs an RSA decryption, resulting in a plaintext integer. If a
 // random source is given, RSA blinding is used.
-// 从crypto/rsa复制
+// Copy from crypto/rsa.
 func decrypt(random io.Reader, priv *rsa.PrivateKey, c *big.Int) (m *big.Int, err error) {
 	// TODO(agl): can we get away with reusing blinds?
 	if c.Cmp(priv.N) > 0 {
@@ -190,7 +185,7 @@ func decrypt(random io.Reader, priv *rsa.PrivateKey, c *big.Int) (m *big.Int, er
 }
 
 // encrypt
-// 从crypto/rsa复制
+// Copy from crypto/rsa.
 func encrypt(c *big.Int, pub *rsa.PublicKey, m *big.Int) *big.Int {
 	e := big.NewInt(int64(pub.E))
 	c.Exp(m, e, pub.N)
@@ -198,7 +193,7 @@ func encrypt(c *big.Int, pub *rsa.PublicKey, m *big.Int) *big.Int {
 }
 
 // decryptAndCheck
-// 从crypto/rsa复制
+// Copy from crypto/rsa.
 func decryptAndCheck(random io.Reader, priv *rsa.PrivateKey, c *big.Int) (m *big.Int, err error) {
 	m, err = decrypt(random, priv, c)
 	if err != nil {
@@ -216,7 +211,7 @@ func decryptAndCheck(random io.Reader, priv *rsa.PrivateKey, c *big.Int) (m *big
 
 // copyWithLeftPad copies src to the end of dest, padding with zero bytes as
 // needed.
-// 从crypto/rsa复制
+// Copy from crypto/rsa.
 func copyWithLeftPad(dest, src []byte) {
 	numPaddingBytes := len(dest) - len(src)
 	for i := 0; i < numPaddingBytes; i++ {
@@ -227,7 +222,7 @@ func copyWithLeftPad(dest, src []byte) {
 
 // leftPad returns a new slice of length size. The contents of input are right
 // aligned in the new slice.
-// 从crypto/rsa复制
+// Copy from crypto/rsa.
 func leftPad(input []byte, size int) (out []byte) {
 	n := len(input)
 	if n > size {

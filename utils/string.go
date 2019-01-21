@@ -1,6 +1,3 @@
-// 字符串处理函数
-//   变更历史
-//     2017-03-30  lixiaoya  新建
 package utils
 
 import (
@@ -8,12 +5,8 @@ import (
 	"regexp"
 )
 
-// DelRepeat 删除重复的字符
-// 比如 a//b//c////c => a/b/c
-//   参数
-//     s: 要处理的字符串
-//   返回
-//     返回处理完的字符串
+// DelRepeat remove duplicate characters.
+// eg: a//b//c////c => a/b/c
 func DelRepeat(s string, c byte) string {
 	b := []byte{}
 	j := 0
@@ -36,16 +29,10 @@ func DelRepeat(s string, c byte) string {
 	return string(b)
 }
 
-// DelRepeat 删除重复的字符
-// 如果olds和news数量不一样，则以数据少的为准
-// 比如 1m12m33 => 1+2=3
-//   参数
-//     s:    要处理的字符串
-//     olds: 要替换的数据
-//     news: 替换的新数据
-//     n:    替换的个数，0不替换， 小于0 全部替换
-//   返回
-//     成功返回处理完的字符串，失败返回错误信息
+// Replace replace string.
+// If the number of olds and news is different, the data is less.
+// n: Replace the number, 0 is not replaced, less than 0 is all replaced.
+// eg: news-["m1", "m2"] olds-["+", "=] 1m12m23 => 1+2=3
 func Replace(src string, olds []string, news []string, n int) string {
 	oldCnt := len(olds)
 	newCnt := len(news)
@@ -66,13 +53,9 @@ func Replace(src string, olds []string, news []string, n int) string {
 	return dst
 }
 
-// Substr 字符串截取
-//   参数
-//     str:    要处理的字符串
-//     start:  截取开始下标
-//     length: 截取长度
-//   返回
-//     返回截取的字符串
+// Substr returns sub string.
+// start: Intercept pos
+// length: Intercept length
 func Substr(str string, start, length int) string {
 	l := len(str)
 	if start >= l {
@@ -94,11 +77,7 @@ func Substr(str string, start, length int) string {
 	return str[start:end]
 }
 
-// Empty 判断字符串是否为空
-//   参数
-//     str: 要判断的字符串
-//   返回
-//     为空时返回true，否则返回false
+// Empty check the string is empty.
 func Empty(str string) bool {
 	if len(str) == 0 {
 		return true
@@ -107,22 +86,14 @@ func Empty(str string) bool {
 	return false
 }
 
-// MbLen 获取字符串的字符数
-//   参数
-//     str: 要判断的字符串
-//   返回
-//     字符数
+// MbLen get the number of characters in the string.
 func MbLen(str string) int {
 	b := []rune(str)
 
 	return len(b)
 }
 
-// GetSafeSql 防sql注入，将sql特殊字符进行删除
-//   参数
-//     str: 要处理的字符串
-//   返回
-//     删除后的数据
+// GetSafeSql delete sql special characters
 func GetSafeSql(str string) string {
 	if Empty(str) {
 		return ""
@@ -133,11 +104,7 @@ func GetSafeSql(str string) string {
 	return reg.ReplaceAllString(str, "")
 }
 
-// Html2Str Html字符替换
-//   参数
-//     html: 要处理的字符串
-//   返回
-//     替换后的数据
+// Html2Str delete html special characters.
 func Html2Str(html string) string {
 	src := string(html)
 
@@ -158,12 +125,8 @@ func Html2Str(html string) string {
 	return strings.TrimSpace(src)
 }
 
-// StrSplit 字符串按指定长度分割到切片中
-//   参数
-//     src:    源字符串
-//     length: 分割的长度，如果长度小于等于0则返回空串
-//   返回
-//     分割后的切片
+// StrSplit split str by the specified length.
+// Return an empty slice if the src length is less than or equal to 0
 func StrSplit(src string, length ...int) []string {
 	length = append(length, 1)
 	res := []string{}

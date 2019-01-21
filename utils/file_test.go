@@ -1,6 +1,3 @@
-// 文件相关函数测试
-//   变更历史
-//     2017-02-20  lixiaoya  新建
 package utils
 
 import (
@@ -9,7 +6,7 @@ import (
 	"fmt"
 )
 
-// TestIsFile IsFile函数测试
+// TestIsFile test IsFile function.
 func TestIsFile(t *testing.T) {
 	name := "./utils.go"
 
@@ -19,7 +16,7 @@ func TestIsFile(t *testing.T) {
 	}
 }
 
-// TestMkDir MkDir函数测试
+// TestMkDir test MkDir function.
 func TestMkDir(t *testing.T) {
 	name := "./test/dd/cc/aa.pid"
 
@@ -29,7 +26,7 @@ func TestMkDir(t *testing.T) {
 	}
 }
 
-// TestWriteFile WriteFile函数测试
+// TestWriteFile test WriteFile function.
 func TestWriteFile(t *testing.T) {
 	name := "/tmp/test.log"
 	for i := 0; i < 10; i++ {
@@ -42,7 +39,7 @@ func TestWriteFile(t *testing.T) {
 	}
 }
 
-// TestWriteFile WriteFile函数测试
+// TestWriteFile test WriteFile function.
 func TestFileCtime(t *testing.T) {
 	sec, nsec, err := FileCtime("./utils.go")
 	fmt.Println(sec, nsec, err)

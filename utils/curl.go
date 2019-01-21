@@ -1,6 +1,3 @@
-// 调用curl相关函数
-//   变更历史
-//     2017-02-06  lixiaoya  新建
 package utils
 
 import (
@@ -23,19 +20,15 @@ const (
 	OPT_SSLCERT
 )
 
-// Curl Get或Post数据
-//   参数
-//     url:     访问的url地址
-//     data:    提交的数据，json或http query格式
-//     method:  方法标识，取值： POST | GET，默认为GET
-//     timeout: 超时时间，单位秒，默认为5秒
-//     params:  其它参数
-//       目前支持如下参数：
-//         OPT_PROXY：     代理，如:http://10.12.34.53:2443
-//         OPT_SSLCERT:    https证书，传map[string]string型，certFile（cert证书）、keyFile（key证书，为空时使用cert证书）、caFile（根ca证书，可为空）
-//         OPT_HTTPHEADER: http请求头，传map[string]string型
-//   返回
-//     结果串、http状态、错误内容
+// Curl Execute HTTP requests.
+// return body string, http status and error message.
+// "data" parameter is request data, JSON or URL query format, but only POST methods can use JSON format.
+// "method" parameter contains POST and GET, default is GET.
+// "timeout" parameter is the timeout time, the unit is seconds, default is 5 seconds.
+// "params" supports the following parameters:
+//   OPT_PROXY:      proxy server, eg: http://10.12.34.53:2443.
+//   OPT_SSLCERT:    ssl certificate, map[string]string type, certFile、keyFile（key certificate, use the cert certificate when it is empty）、caFile（ca certificate, can be empty）.
+//   OPT_HTTPHEADER: http header, map[string]string type.
 func Curl(urlAddr, data, method string, timeout time.Duration, params ...map[int]interface{}) (string, int, error) {
 	if timeout <= 0 {
 		timeout = 5
@@ -68,7 +61,7 @@ func Curl(urlAddr, data, method string, timeout time.Duration, params ...map[int
 	if len(params) > 0 {
 		param := params[0]
 
-		// 设置代理
+		// set proxy
 		if v, ok := param[OPT_PROXY]; ok {
 			if proxyAddr, ok := v.(string); ok {
 				proxy := func(_ *http.Request) (*url.URL, error) {
@@ -79,7 +72,7 @@ func Curl(urlAddr, data, method string, timeout time.Duration, params ...map[int
 			}
 		}
 
-		// 设置证书
+		// set certificate
 		if v, ok := param[OPT_SSLCERT]; ok {
 			if t, ok := v.(map[string]string); ok {
 				if certFile, ok := t["certFile"]; ok && certFile != "" {
@@ -98,7 +91,7 @@ func Curl(urlAddr, data, method string, timeout time.Duration, params ...map[int
 			}
 		}
 
-		// 设置HEADER
+		// set header
 		if v, ok := param[OPT_HTTPHEADER]; ok {
 			if t, ok := v.(map[string]string); ok {
 				for key, val := range t {
@@ -113,7 +106,7 @@ func Curl(urlAddr, data, method string, timeout time.Duration, params ...map[int
 		return "", -1, err
 	}
 
-	// 设置HEADER
+	// set header
 	for key, val := range headers {
 		if strings.ToLower(key) == "host" {
 			req.Host = val
@@ -125,7 +118,7 @@ func Curl(urlAddr, data, method string, timeout time.Duration, params ...map[int
 	client := &http.Client{
 		Timeout: timeout * time.Second,
 	}
-	// 设置Transport
+	// set Transport
 	if tpFlag {
 		client.Transport = &tp
 	}
@@ -144,13 +137,7 @@ func Curl(urlAddr, data, method string, timeout time.Duration, params ...map[int
 	return string(body), resp.StatusCode, nil
 }
 
-// parseTLSConfig 解析证书文件
-//   参数
-//     certFile: cert证书
-//     keyFile:  key证书
-//     caFile:   根ca证书，可为空
-//   返回
-//     解析结果、错误信息
+// parseTLSConfig parse TLS certificate file.
 func parseTLSConfig(certFile, keyFile, caFile string) (*tls.Config, error) {
 	// load cert
 	cert, err := tls.LoadX509KeyPair(certFile, keyFile)
@@ -177,21 +164,17 @@ func parseTLSConfig(certFile, keyFile, caFile string) (*tls.Config, error) {
 	return &tlsCfg, nil
 }
 
-// PostFile 提交文件
-// 目前只支持提交一个文件
-//   参数
-//     url:      访问的url地址
-//     fileKey:  文件key
-//     filePath: 文件全路径
-//     fields:   其它要提交的数据
-//     timeout:  超时时间，单位秒，默认为5秒
-//     params:   其它参数
-//       目前支持如下参数：
-//         OPT_PROXY：     代理，如:http://10.12.34.53:2443
-//         OPT_SSLCERT:    https证书，传map[string]string型，certFile（cert证书）、keyFile（key证书，为空时使用cert证书）、caFile（根ca证书，可为空）
-//         OPT_HTTPHEADER: http请求头，传map[string]string型
-//   返回
-//     结果串、http状态、错误内容
+// PostFile http post a file.
+// Currently only one file submission is supported.
+// return body string, http status and error message.
+// "fileKey" parameter is the key for file.
+// "filePath" parameter is the path for file.
+// "fields" parameter is the other parameter.
+// "timeout" parameter is the timeout time, the unit is seconds, default is 5 seconds.
+// "params" supports the following parameters:
+//   OPT_PROXY:      proxy server, eg: http://10.12.34.53:2443.
+//   OPT_SSLCERT:    ssl certificate, map[string]string type, certFile、keyFile（key certificate, use the cert certificate when it is empty）、caFile（ca certificate, can be empty）.
+//   OPT_HTTPHEADER: http header, map[string]string type.
 func PostFile(urlAddr, fileKey, filePath string, fields map[string]string, timeout time.Duration, params ...map[int]interface{}) (string, int, error) {
 	if timeout <= 0 {
 		timeout = 5
@@ -218,12 +201,12 @@ func PostFile(urlAddr, fileKey, filePath string, fields map[string]string, timeo
 		return "", -1, err
 	}
 
-	// 添加其它字段
+	// add other paramater
 	for k, v := range fields {
 		bodyWriter.WriteField(k, v)
 	}
 
-	// 设置Content-Typ
+	// set Content-Type
 	headers := map[string]string{
 		"Content-Type": bodyWriter.FormDataContentType(),
 	}
@@ -234,7 +217,7 @@ func PostFile(urlAddr, fileKey, filePath string, fields map[string]string, timeo
 	if len(params) > 0 {
 		param := params[0]
 
-		// 设置代理
+		// set proxy
 		if v, ok := param[OPT_PROXY]; ok {
 			if proxyAddr, ok := v.(string); ok {
 				proxy := func(_ *http.Request) (*url.URL, error) {
@@ -245,7 +228,7 @@ func PostFile(urlAddr, fileKey, filePath string, fields map[string]string, timeo
 			}
 		}
 
-		// 设置证书
+		// set certificate
 		if v, ok := param[OPT_SSLCERT]; ok {
 			if t, ok := v.(map[string]string); ok {
 				if certFile, ok := t["certFile"]; ok && certFile != "" {
@@ -264,7 +247,7 @@ func PostFile(urlAddr, fileKey, filePath string, fields map[string]string, timeo
 			}
 		}
 
-		// 设置HEADER
+		// set header
 		if v, ok := param[OPT_HTTPHEADER]; ok {
 			if t, ok := v.(map[string]string); ok {
 				for key, val := range t {
@@ -274,13 +257,13 @@ func PostFile(urlAddr, fileKey, filePath string, fields map[string]string, timeo
 		}
 	}
 
-	// 提交数据
+	// post data
 	req, err := http.NewRequest("POST", urlAddr, bodyBuf)
 	if err != nil {
 		return "", -1, err
 	}
 
-	// 设置HEADER
+	// set header
 	for key, val := range headers {
 		if strings.ToLower(key) == "host" {
 			req.Host = val
@@ -292,7 +275,7 @@ func PostFile(urlAddr, fileKey, filePath string, fields map[string]string, timeo
 	client := &http.Client{
 		Timeout: timeout * time.Second,
 	}
-	// 设置Transport
+	// set Transport
 	if tpFlag {
 		client.Transport = &tp
 	}

@@ -1,21 +1,19 @@
-// 加密解密相关函数测试
-//   变更历史
-//     2017-02-20  lixiaoya  新建
 package utils
 
 import (
 	"testing"
 	"fmt"
+	"encoding/json"
 )
 
-// TestSha1 测试Sha1函数
+// TestSha1 test Sha1
 func TestSha1(t *testing.T) {
 	str := "Hello World!"
 	sh := Sha1(str)
 	fmt.Println(sh)
 }
 
-// TestHmacSha1 测试Sha1函数
+// TestHmacSha1 test Sha1 function.
 func TestHmacSha1(t *testing.T) {
 	str := "Hello World!"
 	key := "123456"
@@ -26,17 +24,17 @@ func TestHmacSha1(t *testing.T) {
 	fmt.Println(sh)
 }
 
-// TestGobEncode 测试GobEncode和GobDecode函数
+// TestGobEncode test GobEncode and GobDecode function.
 func TestGobEncode(t *testing.T) {
 	str := "Hello World!"
-	// 加密
+	// encode
 	e, err := GobEncode(str)
 	if err != nil {
 		t.Errorf("GobEncode failed. err: %s.", err.Error())
 		return
 	}
 
-	// 解密
+	// decode
 	infoNew := new(string)
 	err = GobDecode(e, infoNew)
 	if err != nil {
@@ -48,17 +46,17 @@ func TestGobEncode(t *testing.T) {
 	}
 }
 
-// TestZlibEncode 测试ZlibEncode和ZlibDecode函数
+// TestZlibEncode test ZlibEncode and ZlibDecode function.
 func TestZlibEncode(t *testing.T) {
 	s1 := "Hello World!"
-	// 压缩
+	// compression
 	b, err := ZlibEncode([]byte(s1))
 	if err != nil {
 		t.Errorf("ZlibEncode failed. err: %s.", err.Error())
 		return
 	}
 
-	// 解压
+	// uncompression
 	s2, err := ZlibDecode(b)
 	if err != nil {
 		t.Errorf("ZlibDecode failed. err: %s.", err.Error())
@@ -69,20 +67,20 @@ func TestZlibEncode(t *testing.T) {
 	}
 }
 
-// TestZlibEncode 测试RsaEncode和RsaDecode函数
+// TestZlibEncode test RsaEncode and RsaDecode function.
 func TestRsaEncode(t *testing.T) {
 	s1 := "Hello World!"
 	pubPem := "./data/public.pem"
 	priPem := "./data/private.pem"
 
-	// 公钥加密
+	// public key encode
 	b, err := RsaEncode([]byte(s1), pubPem, MODE_RSA_PUB)
 	if err != nil {
 		t.Errorf("RsaEncode failed. err: %s.", err.Error())
 		return
 	}
 
-	// 私钥解密
+	// private key decode
 	s2, err := RsaDecode(b, priPem, MODE_RSA_PRI)
 	if err != nil {
 		t.Errorf("RsaDecode failed. err: %s.", err.Error())
@@ -92,14 +90,14 @@ func TestRsaEncode(t *testing.T) {
 		return
 	}
 
-	// 私钥加密
+	// private key endoce
 	b, err = RsaEncode([]byte(s1), priPem, MODE_RSA_PRI)
 	if err != nil {
 		t.Errorf("RsaEncode failed. err: %s.", err.Error())
 		return
 	}
 
-	// 公钥解密
+	// public key decode
 	s2, err = RsaDecode(b, pubPem, MODE_RSA_PUB)
 	if err != nil {
 		t.Errorf("RsaDecode failed. err: %s.", err.Error())
@@ -110,14 +108,14 @@ func TestRsaEncode(t *testing.T) {
 	}
 }
 
-// TestBase64Encode 测试Base64Encode和Base64Decode函数
+// TestBase64Encode test Base64Encode and Base64Decode function.
 func TestBase64Encode(t *testing.T) {
 	s1 := "Hello World!"
 
-	// 加密
+	// encode
 	str := Base64Encode([]byte(s1), "m", "m1", "+", "m2", "/", "m3")
 
-	// 解密
+	// decode
 	s2, err := Base64Decode(str, "m3", "/", "m2", "+", "m1", "m")
 	if err != nil {
 		t.Errorf("Base64Decode failed. err: %s.", err.Error())
@@ -128,7 +126,7 @@ func TestBase64Encode(t *testing.T) {
 	}
 }
 
-// TestPadding 测试Padding和UnPadding函数
+// TestPadding test Padding and UnPadding function.
 func TestPadding(t *testing.T) {
 	src := []byte("12345")
 	dst := Padding(src, 16)
@@ -143,7 +141,7 @@ func TestPadding(t *testing.T) {
 	}
 }
 
-// TestDesEncode 测试DesEncode和DesDecode函数
+// TestDesEncode test DesEncode and DesDecode function.
 func TestDesEncode(t *testing.T) {
 	key := "12345678"
 	src := "HelloWorld!"
@@ -163,7 +161,7 @@ func TestDesEncode(t *testing.T) {
 	}
 }
 
-// TestAesEncode 测试AesEncode和AesDecode函数
+// TestAesEncode test AesEncode and AesDecode function.
 func TestAesEncode(t *testing.T) {
 	key := "12345678901234561234567890123456"
 	src := "HelloWorld!"
@@ -181,4 +179,31 @@ func TestAesEncode(t *testing.T) {
 		t.Errorf("AesDecode failed. Got %s, expected %s.", src2, src)
 		return
 	}
+}
+
+// TestStrToJSON test StrToJSON function.
+func TestUnicodeEncode(t *testing.T) {
+	info := `{"aa":"(✪ω✪)"}`
+	strJson := UnicodeEncode([]byte(info))
+	fmt.Println(strJson)
+	arr := make(map[string]string)
+	err := json.Unmarshal([]byte(strJson), &arr)
+	if err != nil {
+		t.Errorf("Unmarshal err: %s", err.Error())
+		return
+	}
+	fmt.Println("00:", arr)
+
+	info = `{"aa":"\ud83d\ude02"}`
+	json.Unmarshal([]byte(info), &arr)
+	fmt.Println("11:", arr)
+	b, _ := json.Marshal(arr)
+	strJson = UnicodeEncode(b)
+	fmt.Println(strJson)
+	err = json.Unmarshal([]byte(strJson), &arr)
+	if err != nil {
+		t.Errorf("Unmarshal err: %s", err.Error())
+		return
+	}
+	fmt.Println(arr)
 }

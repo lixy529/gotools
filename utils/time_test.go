@@ -1,6 +1,3 @@
-// 时间函数测试
-//   变更历史
-//     2017-03-01  lixiaoya  新建
 package utils
 
 import (
@@ -8,20 +5,20 @@ import (
 	"testing"
 )
 
-// TestCurTime CurTime测试
+// TestCurTime test CurTime function.
 func TestCurTime(t *testing.T) {
 	cur := CurTime()
 	fmt.Println(cur)
 }
 
-// TestAddDate AddDate测试
+// TestAddDate test AddDate function.
 func TestAddDate(t *testing.T) {
 	dt := AddDate(-1, -1, -1)
 	dd := dt.Format("20060102")
 	fmt.Println(dd)
 }
 
-// TestStrToTimeStamp StrToTimeStamp测试
+// TestStrToTimeStamp test StrToTimeStamp function.
 func TestStrToTimeStamp(t *testing.T) {
 	strTime := "2017-07-06 16:27:28"
 	st := StrToTimeStamp(strTime)
@@ -39,7 +36,7 @@ func TestStrToTimeStamp(t *testing.T) {
 	}
 }
 
-// TestTimeStampToStr TimeStampToStr测试
+// TestTimeStampToStr test TimeStampToStr function.
 func TestTimeStampToStr(t *testing.T) {
 	var timeStamp int64 = 1499329648
 	strTime := TimeStampToStr(timeStamp)
@@ -56,7 +53,7 @@ func TestTimeStampToStr(t *testing.T) {
 	}
 }
 
-// TestTomrrowRest TomrrowRest测试
+// TestTomrrowRest test TomrrowRest function.
 func TestTomrrowRest(t *testing.T) {
 	dd := TomrrowRest()
 	fmt.Println(dd)

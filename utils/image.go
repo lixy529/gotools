@@ -1,6 +1,3 @@
-// 处理图片相关函数
-//   变更历史
-//     2017-06-15  lixiaoya  新建
 package utils
 
 import (
@@ -13,11 +10,8 @@ import (
 	"strings"
 )
 
-// GetImageType 获取图片的类型
-//   参数
-//     imgFile: ip段地址库文件
-//   返回
-//     图片类型，目前只支持PNG、JPEG、GIF、BMP，其它类型都返回空串
+// GetImageType returns the type of image.
+// Currently only supports PNG, JPEG, GIF, BMP, and other types return empty strings.
 func GetImageType(imgContent []byte) string {
 	if imgContent[0] == 137 && imgContent[1] == 80 {
 		return "PNG"
@@ -32,14 +26,10 @@ func GetImageType(imgContent []byte) string {
 	return ""
 }
 
-// DecodeImg 解析图片
-//   参数
-//     imgFile: 图片文件路径
-//     imgType: 图片类型，目前只支持PNG、JPEG、GIF三种类型
-//   返回
-//     解码后的图片内容，错误信息
+// DecodeImg parsing image.
+// Currently only supports PNG, JPEG and GIF.
 func DecodeImg(imgFile string, imgType string) (image.Image, error) {
-	// 打开图片文件
+	// open image
 	f, err := os.Open(imgFile)
 	if err != nil {
 		return nil, err
@@ -47,7 +37,7 @@ func DecodeImg(imgFile string, imgType string) (image.Image, error) {
 
 	defer f.Close()
 
-	// 解码
+	// decode
 	var img image.Image
 	iType := strings.ToUpper(imgType)
 	if iType == "JPEG" {
@@ -66,29 +56,24 @@ func DecodeImg(imgFile string, imgType string) (image.Image, error) {
 	return img, nil
 }
 
-// EncodeImage 生成图片
-//   参数
-//     imgFile: 图片文件路径
-//     img:     解码后的图片内容
-//     imgType: 图片类型，目前只支持PNG、JPEG、GIF三种类型
-//     option:  JPEG时传图片质量-[1,100]、GIF时颜色范围-[1,256]
-//   返回
-//     解码后的图片内容，错误信息
+// EncodeImage create image.
+// Currently only supports PNG, JPEG and GIF.
+// option: JPEG-[1,100], GIF-[1,256]
 func EncodeImage(imgFile string, img image.Image, imgType string, option ...int) error {
-	// 创建文件目录
+	// mkdir
 	err := MkDir(imgFile, os.ModeDir|0755, true)
 	if err != nil {
 		return err
 	}
 
-	// 打开图片文件
+	// open image
 	f, err := os.OpenFile(imgFile, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0666)
 	if nil != err {
 		return err
 	}
 	defer f.Close()
 
-	// 写图片文件
+	// write image
 	imgType = strings.ToUpper(imgType)
 	if imgType == "PNG" {
 		return png.Encode(f, img)

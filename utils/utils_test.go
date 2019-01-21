@@ -1,6 +1,3 @@
-// 通用函数测试
-//   变更历史
-//     2017-02-06  lixiaoya  新建
 package utils
 
 import (
@@ -8,18 +5,18 @@ import (
 	"testing"
 )
 
-// TestUniqid 测试Uniqid函数
+// TestUniqid test Uniqid function.
 func TestUniqid(t *testing.T) {
 	fmt.Println("uniqid1: " + Uniqid("le"))
 	fmt.Println("uniqid2: " + Uniqid("le", true))
 }
 
-// TestGuid 测试Guid函数
+// TestGuid test Guid function.
 func TestGuid(t *testing.T) {
 	fmt.Println("guid: " + Guid())
 }
 
-// TestGetTopDomain GetTopDomain函数测试
+// TestGetTopDomain test GetTopDomain function.
 func TestGetTopDomain(t *testing.T) {
 	domain := "http://www.lixy.com:9090?aa=11&b=22"
 	topDomain := GetTopDomain(domain)
@@ -71,7 +68,7 @@ func TestGetTopDomain(t *testing.T) {
 	}
 }
 
-// TestGetLocalIp GetLocalIp函数测试
+// TestGetLocalIp test GetLocalIp function.
 func TestGetLocalIp(t *testing.T) {
 	addr := GetLocalIp()
 	if addr == "" {
@@ -81,13 +78,13 @@ func TestGetLocalIp(t *testing.T) {
 	t.Log(addr)
 }
 
-// TestStack Stack测试
+// TestStack test Stack function.
 func TestStack(t *testing.T) {
 	stack := Stack(1, 6)
 	fmt.Println(stack)
 }
 
-// TestKrand 测试Krand函数
+// TestKrand test Krand function.
 func TestKrand(t *testing.T) {
 	fmt.Println("num:    " + Krand(16, RAND_KIND_NUM))
 	fmt.Println("lower:  " + Krand(16, RAND_KIND_LOWER))
@@ -96,7 +93,7 @@ func TestKrand(t *testing.T) {
 	fmt.Println("all:    " + Krand(16, RAND_KIND_ALL))
 }
 
-// TestIrand 测试Irand函数
+// TestIrand test Irand function.
 func TestIrand(t *testing.T) {
 	for i := 0; i <= 100; i++ {
 		n := Irand(100, 100)
@@ -108,13 +105,13 @@ func TestIrand(t *testing.T) {
 	}
 }
 
-// TestRangeInt 测试RangeInt函数
+// TestRangeInt test RangeInt function.
 func TestRangeInt(t *testing.T) {
 	res := RangeInt(0, 255)
 	fmt.Println(res)
 }
 
-// TestGetTerminal 测试GetTerminal函数
+// TestGetTerminal test GetTerminal function.
 func TestGetTerminal(t *testing.T) {
 	tType, osType := GetTerminal("aaiPadbb")
 	if tType != "pad" || osType != "ios" {
@@ -153,7 +150,7 @@ func TestGetTerminal(t *testing.T) {
 	}
 }
 
-// TestSelStrVal SelStrVal函数测试
+// TestSelStrVal test SelStrVal function.
 func TestSelStrVal(t *testing.T) {
 	opt1 := "aaa"
 	opt2 := "bbb"
@@ -168,7 +165,7 @@ func TestSelStrVal(t *testing.T) {
 	}
 }
 
-// TestSelIntVal SelIntVal函数测试
+// TestSelIntVal test SelIntVal function.
 func TestSelIntVal(t *testing.T) {
 	opt1 := 111
 	opt2 := 222

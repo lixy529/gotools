@@ -1,6 +1,3 @@
-// 字符串处理函数测试
-//   变更历史
-//     2017-03-30  lixiaoya  新建
 package utils
 
 import (
@@ -8,7 +5,7 @@ import (
 	"fmt"
 )
 
-// TestDelRepeat DelRepeat测试
+// TestDelRepeat test DelRepeat function.
 func TestDelRepeat(t *testing.T) {
 	s := "///aa///bb///cc///dd//"
 	res := DelRepeat(s, '/')
@@ -25,7 +22,7 @@ func TestDelRepeat(t *testing.T) {
 	}
 }
 
-// TestReplace Replace测试
+// TestReplace test Replace function.
 func TestReplace(t *testing.T) {
 	s := "11m122m233m344m155m299"
 	olds := []string{"m1", "m2", "m3"}
@@ -38,7 +35,7 @@ func TestReplace(t *testing.T) {
 	}
 }
 
-// TestSubstr Substr测试
+// TestSubstr test Substr function.
 func TestSubstr(t *testing.T) {
 	s := "1234567890"
 	sub := Substr(s, 0, 30)
@@ -111,7 +108,7 @@ func TestEmpty(t *testing.T) {
 	}
 }
 
-// TestMbLen MbLen测试
+// TestMbLen test MbLen function.
 func TestMbLen(t *testing.T) {
 	str := "我爱五星红旗,Do you love it?"
 	l := MbLen(str)
@@ -135,7 +132,7 @@ func TestMbLen(t *testing.T) {
 	}
 }
 
-// TestGetSafeSql GetSafeSql测试
+// TestGetSafeSql test GetSafeSql function.
 func TestGetSafeSql(t *testing.T) {
 	str := "Select 11 seleCt 22 upDate 33 information_schema.columns 44 table_sChema 55 net user BBBSelect Update"
 	dst := " 11  22  33  44  55  BBBSelect "
@@ -146,7 +143,7 @@ func TestGetSafeSql(t *testing.T) {
 	}
 }
 
-// TestHtml2Str Html2Str测试
+// TestHtml2Str Html2Str function.
 func TestHtml2Str(t *testing.T) {
 	html := `<html>hello</html>`
 	str := Html2Str(html)
@@ -177,7 +174,7 @@ func TestHtml2Str(t *testing.T) {
 	}
 }
 
-// TestStrSplit StrSplit测试
+// TestStrSplit test StrSplit function.
 func TestStrSplit(t *testing.T) {
 	src := "abcdef"
 	arr := StrSplit(src, 0)

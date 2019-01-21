@@ -1,6 +1,3 @@
-// 处理图片相关函数测试
-//   变更历史
-//     2017-06-15  lixiaoya  新建
 package utils
 
 import (
@@ -8,7 +5,7 @@ import (
 	"io/ioutil"
 )
 
-// TestIsFile IsFile函数测试
+// TestIsFile test IsFile function.
 func TestGetImageType(t *testing.T) {
 	imgContent, err := ioutil.ReadFile("./data/timg.jpeg")
 	if err != nil {
@@ -23,19 +20,19 @@ func TestGetImageType(t *testing.T) {
 	}
 }
 
-// TestTranImage 测试图片转换
+// TestTranImage Test conversion image type.
 func TestTranImage(t *testing.T) {
 	srcFile := "./data/timg.jpeg"
 	dstFile := "./data/timg.png"
 
-	// 解析图片
+	// parsing image
 	img, err := DecodeImg(srcFile, "JPEG")
 	if err != nil {
 		t.Errorf("DecodeImg err: %s", err.Error())
 		return
 	}
 
-	// 生成图片
+	// create image
 	err =  EncodeImage(dstFile, img, "PNG")
 	if err != nil {
 		t.Errorf("EncodeImage err: %s", err.Error())

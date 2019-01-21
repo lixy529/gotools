@@ -1,6 +1,3 @@
-// 加密解密相关函数
-//   变更历史
-//     2017-02-20  lixiaoya  新建
 package utils
 
 import (
@@ -22,42 +19,31 @@ import (
 	"crypto/des"
 	"crypto/sha1"
 	"crypto/hmac"
+	"strconv"
+	"fmt"
 )
 
 const (
-	MODE_RSA_PUB = 1 // 公钥加密或公钥解密
-	MODE_RSA_PRI = 2 // 私钥加密或私钥解密
+	MODE_RSA_PUB = 1 // public key encode or public key decode
+	MODE_RSA_PRI = 2 // private key encode or private key decode
 )
 
-//Md5 生成32位md5串
-//   参数
-//     s: 要加密的串
-//   返回
-//     md5后的结果
+// Md5 returns a 32-bit md5 string.
 func Md5(s string) string {
 	h := md5.New()
 	h.Write([]byte(s))
 	return hex.EncodeToString(h.Sum(nil))
 }
 
-//Sha1 生成sha1串
-//   参数
-//     s: 要加密的串
-//   返回
-//     sha1后的结果
+// Sha1 returns sha1 string.
 func Sha1(s string) string {
 	h := sha1.New()
 	h.Write([]byte(s))
 	return hex.EncodeToString(h.Sum(nil))
 }
 
-//HmacSha1 生成hash_hmac串
-//   参数
-//     s: 要加密的串
-//     k: 加密密钥
-//     isBase64: 是否返回base64加密的串，默认false
-//   返回
-//     hash_hmac后的结果
+// HmacSha1 returns hash_hmac string.
+// Base64 encoding if "isBase64" is true, defautl is false.
 func HmacSha1(s, k string, isBase64 ...bool) string {
 	h := hmac.New(sha1.New, []byte(k))
 	h.Write([]byte(s))
@@ -69,13 +55,7 @@ func HmacSha1(s, k string, isBase64 ...bool) string {
 	return hex.EncodeToString(h.Sum(nil))
 }
 
-// GobEncode 用gob进行数据编码
-//   调用
-//     e, err := GobEncode("Hello World!")
-//   参数
-//     data: 要加密的串
-//   返回
-//     加密后的结果
+// GobEncode returns encode string by gob.
 func GobEncode(data interface{}) ([]byte, error) {
 	buf := bytes.NewBuffer(nil)
 	enc := gob.NewEncoder(buf)
@@ -86,25 +66,14 @@ func GobEncode(data interface{}) ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-// GobDecode 用gob进行数据解码
-//   调用
-//     infoNew := new(string)
-//     err := GobDecode(e, infoNew)
-//   参数
-//     data: 加密串
-//   返回
-//     解密后的结果
+// GobDecode returns decode string by gob.
 func GobDecode(data []byte, to interface{}) error {
 	buf := bytes.NewBuffer(data)
 	dec := gob.NewDecoder(buf)
 	return dec.Decode(to)
 }
 
-// ZlibEncode zlib压缩
-//   参数
-//     data: 要压缩的数据
-//   返回
-//     成功时返回压缩后的数据，失败返回错误信息
+// ZlibEncode Zlib compression.
 func ZlibEncode(data []byte) ([]byte, error) {
 	var b bytes.Buffer
 	w := zlib.NewWriter(&b)
@@ -118,11 +87,7 @@ func ZlibEncode(data []byte) ([]byte, error) {
 	return b.Bytes(), nil
 }
 
-// ZlibDecode zlib解压
-//   参数
-//     data: 要解压的数据
-//   返回
-//     成功时返回解压后的数据，失败返回错误信息
+// ZlibDecode Zlib uncompression.
 func ZlibDecode(data []byte) ([]byte, error) {
 	b := bytes.NewReader(data)
 	r, err := zlib.NewReader(b)
@@ -136,16 +101,12 @@ func ZlibDecode(data []byte) ([]byte, error) {
 	return buf.Bytes(), err
 }
 
-// RsaEncode Rsa加密
-//   参数
-//     data:    要加密的数据
-//     pemFile: pem证书文件
-//     mode:    加密模式，取值: MODE_RSA_PUB、MODE_RSA_PRI
-//   返回
-//     成功返回加密结果，失败返回错误信息
+// RsaEncode returns encode string by rsa.
+// "pemFile" paramater is the pem certificate.
+// public key encode when "mode" is MODE_RSA_PUB, private key encode when "mode" is MODE_RSA_PRI.
 func RsaEncode(data []byte, pemFile string, mode int) ([]byte, error) {
 	if mode == MODE_RSA_PRI {
-		// 私钥加密
+		// private key encode
 		privateKey, err := ioutil.ReadFile(pemFile)
 		if err != nil {
 			return nil, err
@@ -163,7 +124,7 @@ func RsaEncode(data []byte, pemFile string, mode int) ([]byte, error) {
 		return EncPKCS1v15(rand.Reader, priv, data)
 	}
 
-	// 公钥加密
+	// public key encode
 	publicKey, err := ioutil.ReadFile(pemFile)
 	if err != nil {
 		return nil, err
@@ -183,17 +144,13 @@ func RsaEncode(data []byte, pemFile string, mode int) ([]byte, error) {
 	return rsa.EncryptPKCS1v15(rand.Reader, pub, data)
 }
 
-// RsaDecode Rsa解密
-// 参数 https://github.com/dgkang/rsa
-//   参数
-//     data:    要解密的数据
-//     pemFile: pem证书文件
-//     mode:    加密模式，取值: MODE_RSA_PUB、MODE_RSA_PRI
-//   返回
-//     成功返回解密结果，失败返回错误信息
+// RsaDecode returns decode string by rsa.
+// Reference resources https://github.com/dgkang/rsa .
+// "pemFile" paramater is the pem certificate.
+// public key decode when "mode" is MODE_RSA_PUB, private key decode when "mode" is MODE_RSA_PRI.
 func RsaDecode(data []byte, pemFile string, mode int) ([]byte, error) {
 	if mode == MODE_RSA_PUB {
-		// 公钥解密
+		// private decode
 		publicKey, err := ioutil.ReadFile(pemFile)
 		if err != nil {
 			return nil, err
@@ -213,7 +170,7 @@ func RsaDecode(data []byte, pemFile string, mode int) ([]byte, error) {
 		return DecPKCS1v15(pub, data)
 	}
 
-	// 私钥解密
+	// private decode
 	privateKey, err := ioutil.ReadFile(pemFile)
 	if err != nil {
 		return nil, err
@@ -230,12 +187,8 @@ func RsaDecode(data []byte, pemFile string, mode int) ([]byte, error) {
 	return rsa.DecryptPKCS1v15(rand.Reader, priv, data)
 }
 
-// Base64Encode Base64加密
-//   参数
-//     data:     要加密的数据
-//     replaces: Base64加密后的替换新老数据对，必须成对，解密时要传加密数据相反
-//   返回
-//     返回加密结果
+// Base64Encode returns encode string by base64.
+// "replaces" is the data to be replaced.
 func Base64Encode(data []byte, replaces ...string) string {
 	str := base64.StdEncoding.EncodeToString(data)
 	n := len(replaces)
@@ -253,12 +206,8 @@ func Base64Encode(data []byte, replaces ...string) string {
 	return str
 }
 
-// Base64Decode Base64解密
-//   参数
-//     data:     要解密的数据
-//     replaces: Base64加密后的替换新老数据对，必须成对，解密时要传加密数据相反
-//   返回
-//     成功返回解密结果，失败返回错误信息
+// Base64Decode returns decode string by base64
+// "replaces" is the data to be replaced.
 func Base64Decode(data string, replaces ...string) ([]byte, error) {
 	n := len(replaces)
 	if n > 1 {
@@ -272,7 +221,7 @@ func Base64Decode(data string, replaces ...string) ([]byte, error) {
 		data = Replace(data, olds, news, -1)
 	}
 
-	// 处理不规范加密串
+	// Handling non-standard encrypted strings
 	if m := len(data) % 4; m != 0 {
 		data += strings.Repeat("=", 4-m)
 	}
@@ -280,25 +229,15 @@ func Base64Decode(data string, replaces ...string) ([]byte, error) {
 	return base64.StdEncoding.DecodeString(data)
 }
 
-// Padding 将text补充到blockSize的整数倍
-// 如果text长度正好是blockSize的整数倍，则还会添加blockSize长的数据
-//   参数
-//     text:      原始数据
-//     blockSize: 每块大小
-//   返回
-//     填充后的数据
+// Padding add text to an integer multiple of blockSize.
+// If the text length is exactly an integer multiple of blockSize, then blockSize long data will be added.
 func Padding(text []byte, blockSize int) []byte {
 	padding := blockSize - len(text)%blockSize
 	padtext := bytes.Repeat([]byte{byte(padding)}, padding)
 	return append(text, padtext...)
 }
 
-// UnPadding 删除Padding填充的数据
-//   参数
-//     text:      原始数据
-//     blockSize: 每块大小
-//   返回
-//     原始数据
+// UnPadding delete Padding filled data.
 func UnPadding(text []byte) []byte {
 	length := len(text)
 	unpadding := int(text[length-1])
@@ -310,12 +249,8 @@ func UnPadding(text []byte) []byte {
 	return text[:(length - unpadding)]
 }
 
-// DesEncode Des加密
-//   参数
-//     data: 要加密的数据
-//     key:  加密key，只能是8位
-//   返回
-//     成功时返回加密结果，失败时返回错误信息
+// DesEncode returns encode string by des.
+// The key must be 8 digits and the excess will be truncated.
 func DesEncode(data, key []byte) ([]byte, error) {
 	l := len(key)
 	if l > 8 {
@@ -337,12 +272,8 @@ func DesEncode(data, key []byte) ([]byte, error) {
 	return encode, nil
 }
 
-// DesDecode Des解密
-//   参数
-//     data: 要解密的数据
-//     key:  加密key，只能是8位
-//   返回
-//     成功返回解密结果，失败返回错误信息
+// DesDecode returns decode string by des.
+// The key must be 8 digits and the excess will be truncated.
 func DesDecode(data, key []byte) ([]byte, error) {
 	l := len(key)
 	if l > 8 {
@@ -364,12 +295,8 @@ func DesDecode(data, key []byte) ([]byte, error) {
 	return decode, nil
 }
 
-// AesEncode Aes加密
-//   参数
-//     data: 要加密的数据
-//     key:  加密key，密码为16的倍数
-//   返回
-//     成功时返回加密结果，失败时返回错误信息
+// AesEncode returns encode string by aes.
+// The key must be a multiple of 16, and the excess will be truncated.
 func AesEncode(data, key []byte) ([]byte, error) {
 	l := len(key)
 	if l < 16 {
@@ -393,12 +320,8 @@ func AesEncode(data, key []byte) ([]byte, error) {
 	return encode, nil
 }
 
-// AesDecode Aes解密
-//   参数
-//     data: 要解密的数据
-//     key:  加密key，密码为16的倍数
-//   返回
-//     成功返回解密结果，失败返回错误信息
+// AesDecode returns decode string by aes.
+// The key must be a multiple of 16, and the excess will be truncated.
 func AesDecode(data, key []byte) ([]byte, error) {
 	l := len(key)
 	if l < 16 {
@@ -421,4 +344,60 @@ func AesDecode(data, key []byte) ([]byte, error) {
 
 	return decode, nil
 
+}
+
+// UnicodeEncode Encoding the wide characters in the JSON string.
+func UnicodeEncode(b []byte) string {
+	var buf bytes.Buffer
+	strLen := len(b)
+	for i := 0; i < strLen; i++ {
+		c1 := int64(b[i])
+		// Single byte
+		if c1 < 128 {
+			if c1 > 31 {
+				buf.WriteByte(b[i])
+			} else {
+				buf.WriteString(fmt.Sprintf("\\u%04s", strconv.FormatInt(c1, 16)))
+			}
+			continue
+		}
+
+		// Double byte
+		i++
+		if i >= strLen {
+			break;
+		}
+		c2 := int64(b[i])
+		if c1&32 == 0 {
+			buf.WriteString(fmt.Sprintf("\\u%04s", strconv.FormatInt((c1-192)*64+c2-128, 16)))
+			continue
+		}
+
+		// Triple
+		i++
+		if i >= strLen {
+			break;
+		}
+		c3 := int64(b[i])
+		if c1&16 == 0 {
+			buf.WriteString(fmt.Sprintf("\\u%04s", strconv.FormatInt(((c1-224)<<12)+((c2-128)<<6)+(c3-128), 16)))
+			continue
+		}
+
+		// Quadruple
+		i++
+		if i >= strLen {
+			break;
+		}
+		c4 := int64(b[i])
+		if c1&8 == 0 {
+			var u int64 = ((c1 & 15) << 2) + ((c2 >> 4) & 3) - 1
+
+			var w1 int64 = (54 << 10) + (u << 6) + ((c2 & 15) << 2) + ((c3 >> 4) & 3)
+			var w2 int64 = (55 << 10) + ((c3 & 15) << 6) + (c4 - 128)
+			buf.WriteString(fmt.Sprintf("\\u%04s\\u%04s", strconv.FormatInt(w1, 16), strconv.FormatInt(w2, 16)))
+		}
+	}
+
+	return buf.String()
 }

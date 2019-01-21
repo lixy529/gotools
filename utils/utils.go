@@ -1,6 +1,3 @@
-// 通用函数
-//   变更历史
-//     2017-02-06  lixiaoya  新建
 package utils
 
 import (
@@ -22,19 +19,15 @@ import (
 )
 
 const (
-	RAND_KIND_NUM    = 0 // 纯数字
-	RAND_KIND_LOWER  = 1 // 小写字母
-	RAND_KIND_UPPER  = 2 // 大写字母
-	RAND_KIND_LETTER = 3 // 大小写字母
-	RAND_KIND_ALL    = 4 // 数字、大小写字母
+	RAND_KIND_NUM    = 0 // Numbers
+	RAND_KIND_LOWER  = 1 // Lowercase letters
+	RAND_KIND_UPPER  = 2 // Uppercase letter
+	RAND_KIND_LETTER = 3 // Lowercase and Uppercase letters
+	RAND_KIND_ALL    = 4 // Numbers, Lowercase and Uppercase letters
 )
 
-// Uniqid 生成唯一串
-//   参数
-//     prefix: 前缀
-//     r:      带上随机串
-//   返回
-//     唯一串
+// Uniqid return unique string.
+// r: Whether to add a random string, eg: xx_5c4530a0634c877.66605056
 func Uniqid(prefix string, r ...bool) string {
 	t := time.Now()
 	str := fmt.Sprintf("%s%x%x", prefix, t.Unix(), t.UnixNano() - t.Unix() * 1000000000)
@@ -44,11 +37,7 @@ func Uniqid(prefix string, r ...bool) string {
 	return str
 }
 
-// Guid 生成Guid字符串
-//   参数
-//     void
-//   返回
-//     生成的Guid串
+// Guid return guid.
 func Guid() string {
 	b := make([]byte, 48)
 
@@ -58,12 +47,9 @@ func Guid() string {
 	return Md5(base64.URLEncoding.EncodeToString(b) + Uniqid(""))
 }
 
-// Krand 随机字符串
-//   参数
-//     size: 字符串个数
-//     kind: 字符串类型，取值为：RAND_KIND_NUM、RAND_KIND_LOWER、RAND_KIND_UPPER、RAND_KIND_LETTER、RAND_KIND_ALL
-//   返回
-//     生成的字符串
+// Krand returns a random string.
+// size is String length.
+// kind values are RAND_KIND_NUM, RAND_KIND_LOWER, RAND_KIND_UPPER, RAND_KIND_LETTER and RAND_KIND_ALL.
 func Krand(size int, kind int) string {
 	ikind, bases, scopes, result := kind, []int{48, 97, 65}, []int{10, 26, 26}, make([]byte, size)
 	is_all := kind > 3 || kind < 0
@@ -81,12 +67,7 @@ func Krand(size int, kind int) string {
 	return string(result)
 }
 
-// Irand 随机生成一个指定范围的数字，范围[start, end]
-//   参数
-//     start: 开始值
-//     end:   结束值
-//   返回
-//     生成的数字
+// Irand Returns a random number of the specified range [start, end].
 func Irand(start, end int) int {
 	if start >= end {
 		return end
@@ -96,12 +77,8 @@ func Irand(start, end int) int {
 	return ikind
 }
 
-// RangeInt 生成值为start到end的切片，范围[start, end]
-//   参数
-//     start: 开始值
-//     end:   结束值
-//   返回
-//     生成的数字切片
+// RangeInt return the slice from start to end, range [start, end].
+// eg: [0 1 2 3 4 5 6 7 8 9 10]
 func RangeInt(start, end int) []int {
 	res := make([]int, end - start + 1)
 	for i := 0; i <= end - start; i++ {
@@ -111,18 +88,13 @@ func RangeInt(start, end int) []int {
 	return res
 }
 
-// getTopDomain 获取一级域名，sessionId的cookie记录到一级域名下
-// 比如: www.baidu.com 返回 baidu.com
-//   参数
-//     domain: 域名
-//   返回
-//     一级域名
+// GetTopDomain return the top domain.
 func GetTopDomain(domain string) string {
 	if domain == "" {
 		return ""
 	}
 
-	// 解析url
+	// parse url
 	domain = strings.ToLower(domain)
 	urlAddr := domain
 	if !strings.HasPrefix(domain, "http://") && !strings.HasPrefix(domain, "https://") {
@@ -141,12 +113,12 @@ func GetTopDomain(domain string) string {
 		return domain
 	}
 
-	// ip直接返回
+	// ip
 	if CheckIp(urlHost) {
 		return urlHost
 	}
 
-	// 获取一级域名
+	// top domain
 	domainParts := strings.Split(urlHost, ".")
 	l := len(domainParts)
 	if l > 1 {
@@ -156,11 +128,7 @@ func GetTopDomain(domain string) string {
 	return urlHost
 }
 
-// GetLocalIp 获取本机IP
-//   参数
-//     domain: 域名
-//   返回
-//     本机IP
+// GetLocalIp return local IP
 func GetLocalIp() string {
 	addrs, err := net.InterfaceAddrs()
 	if err != nil {
@@ -178,11 +146,9 @@ func GetLocalIp() string {
 	return ""
 }
 
-// Stack 获取异常代码的函数名、文件名、行数
-//   参数
-//     depth: 堆栈的开始深度和结束深度，默认取1到10
-//   返回
-//     调用代码信息，格式：函数名:文件名:行数 函数名:文件名:行数 函数名:文件名:行数
+// Stack returns the function name, file name, and number of lines of the calling code.
+// depth is the start depth and end depth of the stack, default 1 to 10
+// Format is "function name:file name:number of lines"
 func Stack(depth ...int) string {
 	var stack string
 	var start int = 1
@@ -214,11 +180,8 @@ func Stack(depth ...int) string {
 	return stack
 }
 
-// getCall 获取调用代码文件名和行数
-//   参数
-//     depth: 函数调用深度
-//   返回
-//     文件路径和代码所在行
+// GetCall 获取调用代码文件名和行数 returns the function name and number of lines of the calling code.
+// depth is the start depth and end depth of the stack.
 func GetCall(depth int) (string, int) {
 	_, file, line, ok := runtime.Caller(depth)
 	if !ok {
@@ -235,11 +198,7 @@ func GetCall(depth int) (string, int) {
 	return file, line
 }
 
-// handleSignals 捕获信号
-//   参数
-//     void
-//   返回
-//     信号编号和名称
+// HandleSignals Returns the captured signal number and name.
 func HandleSignals() (os.Signal, string) {
 	var sig os.Signal
 	signalChan := make(chan os.Signal)
@@ -270,13 +229,9 @@ func HandleSignals() (os.Signal, string) {
 	}
 }
 
-// GetTerminal 获取客户终端信息
-//   参数
-//     userAgent: 客户的USER_AGENT
-//   返回
-//     终端类型pc、phone、pad）和终端操作系统（win、unix、linux、mac、ios、android）
-//     终端类型（
-//     终端操作类型
+// GetTerminal return client terminal information.
+// terminal type: pc, phone, pad.
+// terminal os: win, unix, linux, mac, ios, android.
 func GetTerminal(userAgent string) (string, string) {
 	userAgent = strings.ToLower(userAgent)
 
@@ -297,13 +252,9 @@ func GetTerminal(userAgent string) (string, string) {
 	return "pc", "win"
 }
 
-// SelStrVal 根据条件返回相应选项
-//   参数
-//     con:  条件
-//     opt1: 选项1
-//     opt2: 选项2
-//   返回
-//     如果条件为true，返回选项1，否则返回选项2
+// SelStrVal return options based on conditions.
+// Options is string.
+// If the condition is true, return opt1, otherwise return opt2.
 func SelStrVal(con bool, opt1, opt2 string) string {
 	if con {
 		return opt1
@@ -312,13 +263,9 @@ func SelStrVal(con bool, opt1, opt2 string) string {
 	return opt2
 }
 
-// SelIntVal 根据条件返回相应选项
-//   参数
-//     con:  条件
-//     opt1: 选项1
-//     opt2: 选项2
-//   返回
-//     如果条件为true，返回选项1，否则返回选项2
+// SelIntVal return options based on conditions.
+// Options is int.
+// If the condition is true, return opt1, otherwise return opt2.
 func SelIntVal(con bool, opt1, opt2 int) int {
 	if con {
 		return opt1

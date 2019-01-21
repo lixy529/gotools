@@ -1,6 +1,3 @@
-// 转换相关函数
-//   变更历史
-//     2017-03-30  lixiaoya  新建
 package utils
 
 import (
@@ -10,16 +7,11 @@ import (
 	"net"
 	"strconv"
 	"strings"
-	"fmt"
 	"net/url"
 )
 
-// IpItoa IP整型转字符串
-// 如: "10.58.1.29" => 171573533
-//   参数
-//     iIp: IP整型形式
-//   返回
-//     IP字符串形式
+// IpItoa IP integer to string.
+// eg: "10.58.1.29" => 171573533.
 func IpItoa(iIp int64) string {
 	var bs [4]byte
 	bs[0] = byte(iIp & 0xFF)
@@ -30,12 +22,8 @@ func IpItoa(iIp int64) string {
 	return net.IPv4(bs[3], bs[2], bs[1], bs[0]).String()
 }
 
-// IpAtoi IP字符串转整型
-// 如: 171573533 => "10.58.1.29"
-//   参数
-//     sIp: IP字符串形式
-//   返回
-//     IP整型形式
+// IpAtoi IP string to integer.
+// eg: 171573533 => "10.58.1.29".
 func IpAtoi(sIp string) int64 {
 	if !IsIpv4(sIp) {
 		return -1
@@ -57,12 +45,8 @@ func IpAtoi(sIp string) int64 {
 	return sum
 }
 
-// Int32ToByte int32转[]byte
-//   参数
-//     i:     int32数据
-//     isBig: 是否大端，true-大端 false-小端
-//   返回
-//     转成结果
+// Int32ToByte int32 to []byte.
+// "isBig" is true if big endian is required, otherwise is false.
 func Int32ToByte(i int32, isBig bool) []byte {
 	bBuf := bytes.NewBuffer([]byte{})
 	if isBig {
@@ -74,12 +58,8 @@ func Int32ToByte(i int32, isBig bool) []byte {
 	return bBuf.Bytes()
 }
 
-// ByteToInt32 []byte转int32
-//   参数
-//     b:     []byte数据
-//     isBig: 是否大端，true-大端 false-小端
-//   返回
-//     转成结果
+// ByteToInt32 []byte to int32.
+// "isBig" is true if big endian is required, otherwise is false.
 func ByteToInt32(b []byte, isBig bool) int32 {
 	bBuf := bytes.NewBuffer(b)
 	var i int32
@@ -92,12 +72,8 @@ func ByteToInt32(b []byte, isBig bool) int32 {
 	return i
 }
 
-// Int64ToByte int64转[]byte
-//   参数
-//     i:     int64数据
-//     isBig: 是否大端，true-大端 false-小端
-//   返回
-//     转成结果
+// Int64ToByte int64 to []byte.
+// "isBig" is true if big endian is required, otherwise is false.
 func Int64ToByte(i int64, isBig bool) []byte {
 	bBuf := bytes.NewBuffer([]byte{})
 	if isBig {
@@ -109,12 +85,8 @@ func Int64ToByte(i int64, isBig bool) []byte {
 	return bBuf.Bytes()
 }
 
-// ByteToInt64 []byte转int64
-//   参数
-//     i:     []byte数据
-//     isBig: 是否大端，true-大端 false-小端
-//   返回
-//     转成结果
+// ByteToInt64 []byte to int64.
+// "isBig" is true if big endian is required, otherwise is false.
 func ByteToInt64(b []byte, isBig bool) int64 {
 	bBuf := bytes.NewBuffer(b)
 	var i int64
@@ -127,12 +99,8 @@ func ByteToInt64(b []byte, isBig bool) int64 {
 	return i
 }
 
-// Float32ToByte foat32转[]byte
-//   参数
-//     f:     float32数据
-//     isBig: 是否大端，true-大端 false-小端
-//   返回
-//     转成结果
+// Float32ToByte foat32 to []byte.
+// "isBig" is true if big endian is required, otherwise is false.
 func Float32ToByte(f float32, isBig bool) []byte {
 	bits := math.Float32bits(f)
 	bs := make([]byte, 4)
@@ -145,12 +113,8 @@ func Float32ToByte(f float32, isBig bool) []byte {
 	return bs
 }
 
-// ByteToFloat32 []byte转foat32
-//   参数
-//     b:     []byte数据
-//     isBig: 是否大端，true-大端 false-小端
-//   返回
-//     转成结果
+// ByteToFloat32 []byte to int32.
+// "isBig" is true if big endian is required, otherwise is false.
 func ByteToFloat32(b []byte, isBig bool) float32 {
 	var bits uint32
 	if isBig {
@@ -162,12 +126,8 @@ func ByteToFloat32(b []byte, isBig bool) float32 {
 	return math.Float32frombits(bits)
 }
 
-// Float64ToByte foat64转[]byte
-//   参数
-//     f:     float32数据
-//     isBig: 是否大端，true-大端 false-小端
-//   返回
-//     转成结果
+// Float64ToByte foat64 to []byte.
+// "isBig" is true if big endian is required, otherwise is false.
 func Float64ToByte(f float64, isBig bool) []byte {
 	bits := math.Float64bits(f)
 	bs := make([]byte, 8)
@@ -180,12 +140,8 @@ func Float64ToByte(f float64, isBig bool) []byte {
 	return bs
 }
 
-// ByteToFloat64 []byte转foat64
-//   参数
-//     b:     []byte数据
-//     isBig: 是否大端，true-大端 false-小端
-//   返回
-//     转成结果
+// ByteToFloat64 []byte to int64.
+// "isBig" is true if big endian is required, otherwise is false.
 func ByteToFloat64(b []byte, isBig bool) float64 {
 	var bits uint64
 	if isBig {
@@ -197,72 +153,10 @@ func ByteToFloat64(b []byte, isBig bool) float64 {
 	return math.Float64frombits(bits)
 }
 
-// StrToJSON 将字符串进行Json编码
-//   参数
-//     b: json串
-//   返回
-//     编码后的字体串
-func StrToJSON(b []byte) string {
-	var buf bytes.Buffer
-	strLen := len(b)
-	for i := 0; i < strLen; i++ {
-		c1 := int64(b[i])
-		// Single byte
-		if c1 < 128 {
-			if c1 > 31 {
-				buf.WriteByte(b[i])
-			} else {
-				buf.WriteString(fmt.Sprintf("\\u%04s", strconv.FormatInt(c1, 16)))
-			}
-			continue
-		}
-
-		// Double byte
-		i++
-		if i >= strLen {
-			break;
-		}
-		c2 := int64(b[i])
-		if c1&32 == 0 {
-			buf.WriteString(fmt.Sprintf("\\u%04s", strconv.FormatInt((c1-192)*64+c2-128, 16)))
-			continue
-		}
-
-		// Triple
-		i++
-		if i >= strLen {
-			break;
-		}
-		c3 := int64(b[i])
-		if c1&16 == 0 {
-			buf.WriteString(fmt.Sprintf("\\u%04s", strconv.FormatInt(((c1-224)<<12)+((c2-128)<<6)+(c3-128), 16)))
-			continue
-		}
-
-		// Quadruple
-		i++
-		if i >= strLen {
-			break;
-		}
-		c4 := int64(b[i])
-		if c1&8 == 0 {
-			var u int64 = ((c1 & 15) << 2) + ((c2 >> 4) & 3) - 1
-
-			var w1 int64 = (54 << 10) + (u << 6) + ((c2 & 15) << 2) + ((c3 >> 4) & 3)
-			var w2 int64 = (55 << 10) + ((c3 & 15) << 6) + (c4 - 128)
-			buf.WriteString(fmt.Sprintf("\\u%04s\\u%04s", strconv.FormatInt(w1, 16), strconv.FormatInt(w2, 16)))
-		}
-	}
-
-	return buf.String()
-}
-
-// MapToHttpQuery 将map转http参数串，如:a=11&b=22&c=33，特殊字符做url转码
-//   参数
-//     m: 待转换的map
-//   返回
-//     转换后的字符串
-func MapToHttpQuery(m map[string]string) string {
+// MapToUrlQuery Convert map to URL query format.
+// URL transcoding must be performed.
+// eg: a=11&b=22&c=33
+func MapToUrlQuery(m map[string]string) string {
 	if len(m) == 0 {
 		return ""
 	}
@@ -284,12 +178,8 @@ func MapToHttpQuery(m map[string]string) string {
 	return buf.String()
 }
 
-// HttpQueryToMap 将http参数串转map
-//   参数
-//     m: 待转换的字符串
-//   返回
-//     转换后的map
-func HttpQueryToMap(s string) (map[string]string, error) {
+// UrlQueryToMap Convert URL query to map format.
+func UrlQueryToMap(s string) (map[string]string, error) {
 	m := make(map[string]string)
 	if s == "" {
 		return m, nil
