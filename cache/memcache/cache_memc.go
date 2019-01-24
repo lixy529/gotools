@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/bradfitz/gomemcache/memcache"
-	"github.com/lixy529/bingo/cache"
+	"github.com/lixy529/gotools/cache"
 	"github.com/lixy529/gotools/utils"
 	"strconv"
 	"strings"

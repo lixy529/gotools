@@ -2,7 +2,7 @@
 package redisd
 
 import (
-	"github.com/lixy529/bingo/cache"
+	"github.com/lixy529/gotools/cache"
 	"github.com/go-redis/redis"
 	"encoding/json"
 	"fmt"

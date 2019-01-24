@@ -6,7 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/go-redis/redis"
-	"github.com/lixy529/bingo/cache"
+	"github.com/lixy529/gotools/cache"
 	"strconv"
 	"time"
 )
