@@ -4,7 +4,6 @@ import (
 	"errors"
 	"os"
 	"path"
-	"fmt"
 	"syscall"
 	"reflect"
 )
@@ -66,7 +65,6 @@ func WriteFile(name string, data []byte, flag int, perm os.FileMode) (int, error
 func FileCtime(path string) (int64, int64, error) {
 	fi, err := os.Stat(path)
 	if err != nil {
-		fmt.Println("Stat:", err)
 		return -1, -1, err
 	}
 
