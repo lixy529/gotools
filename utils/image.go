@@ -13,6 +13,10 @@ import (
 // GetImageType returns the type of image.
 // Currently only supports PNG, JPEG, GIF, BMP, and other types return empty strings.
 func GetImageType(imgContent []byte) string {
+	if len(imgContent) < 4 {
+		return ""
+	}
+	
 	if imgContent[0] == 137 && imgContent[1] == 80 {
 		return "PNG"
 	} else if imgContent[0] == 255 && imgContent[1] == 216 {

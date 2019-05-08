@@ -5,7 +5,7 @@ import (
 	"io/ioutil"
 )
 
-// TestIsFile test IsFile function.
+// TestGetImageType 测试获取图片类型
 func TestGetImageType(t *testing.T) {
 	imgContent, err := ioutil.ReadFile("./data/timg.jpeg")
 	if err != nil {
@@ -20,7 +20,7 @@ func TestGetImageType(t *testing.T) {
 	}
 }
 
-// TestTranImage Test conversion image type.
+// TestTranImage 测试图片转换
 func TestTranImage(t *testing.T) {
 	srcFile := "./data/timg.jpeg"
 	dstFile := "./data/timg.png"
