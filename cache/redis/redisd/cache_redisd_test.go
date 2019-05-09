@@ -831,6 +831,40 @@ func TestRedisdIJson(t *testing.T) {
 	}
 }
 
+// TestRedisdBit 测试bit相关函数
+func TestRedisdBit(t *testing.T) {
+	var err error
+	adapter := &RedisdCache{}
+	err = adapter.Init(gConfig)
+	if err != nil {
+		t.Errorf("Redisd Init failed. err: %s.", err.Error())
+		return
+	}
+
+	key := "bits"
+	val := 1
+	res, err := adapter.SetBit(key, 0, val, 30)
+	if err != nil {
+		t.Errorf("SetBit failed. err: %s.", err.Error())
+		return
+	}
+	fmt.Println("SetBit res:", res)
+
+	res, err = adapter.GetBit(key, 0)
+	if err != nil {
+		t.Errorf("GetBit failed. err: %s.", err.Error())
+		return
+	}
+	fmt.Println("GetBit res:", res)
+
+	res, err = adapter.BitCount(key, nil)
+	if err != nil {
+		t.Errorf("BitCount failed. err: %s.", err.Error())
+		return
+	}
+	fmt.Println("BitCount res:", res)
+}
+
 // TestRedisdPipeline
 func TestRedisdPipeline(t *testing.T) {
 	var err error

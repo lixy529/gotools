@@ -708,6 +708,64 @@ func (c *RedisdCache) ZCard(key string) (int64, error) {
 	return c.getClient().ZCard(key).Result()
 }
 
+// SetBit 设置或清除指定偏移量上的位(bit)
+//   参数
+//     key:    位图key值
+//     offset: 位图偏移量
+//     value:  位图值，取值：0或1
+//     expire: 失效时长，以秒为单位：从现在开始的相对时间，“0”表示项目没有到期时间
+//   返回
+//     指定偏移量原来储存的位、错误信息
+func (c *RedisdCache) SetBit(key string, offset int64, value int, expire int32) (int64, error) {
+	if c.prefix != "" {
+		key = c.prefix + key
+	}
+
+	res, err := c.getClient().SetBit(key, offset, value).Result()
+	if err != nil {
+		return res, err
+	}
+
+	if expire > 0 {
+		c.getClient().Expire(key, time.Duration(expire)*time.Second)
+	}
+
+	return res, err
+}
+
+// GetBit 获取指定偏移量上的位(bit)
+//   参数
+//     key:    位图key值
+//     offset: 位图偏移量
+//   返回
+//     字符串值指定偏移量上的位(bit)、错误信息
+func (c *RedisdCache) GetBit(key string, offset int64) (int64, error) {
+	if c.prefix != "" {
+		key = c.prefix + key
+	}
+
+	return c.getClient().GetBit(key, offset).Result()
+}
+
+// BitCount 计算给定字符串中被设置为 1 的比特位的数量
+//   参数
+//     key:      位图key值
+//     bitCount: 指定额外的 start 或 end 参数，统计只在特定的位上进行，为nil时统计所有的
+//   返回
+//     给定字符串中被设置为 1 的比特位的数量、错误信息
+func (c *RedisdCache) BitCount(key string, bitCount *cache.BitCount) (int64, error) {
+	if c.prefix != "" {
+		key = c.prefix + key
+	}
+
+	if bitCount != nil {
+		bc := redis.BitCount{Start: bitCount.Start, End: bitCount.End}
+		return c.getClient().BitCount(key, &bc).Result()
+	}
+
+	return c.getClient().BitCount(key, nil).Result()
+}
+
 // Pipeline call pipeline command.
 // Eg:
 //   pipe := rc.Pipeline(false).Pipe

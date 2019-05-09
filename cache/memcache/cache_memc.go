@@ -485,6 +485,21 @@ func (mc *MemcCache) ZCard(key string) (int64, error) {
 	return 0, errors.New("MemcCache: Memcache don't support ZCard")
 }
 
+// SetBit 设置或清除指定偏移量上的位(bit)，memcache没有有序集合
+func (mc *MemcCache) SetBit(key string, offset int64, value int, expire int32) (int64, error) {
+	return 0, errors.New("MemcCache: Memcache don't support Bit")
+}
+
+// GetBit 获取指定偏移量上的位(bit)，memcache没有有序集合
+func (mc *MemcCache) GetBit(key string, offset int64) (int64, error) {
+	return 0, errors.New("MemcCache: Memcache don't support Bit")
+}
+
+// BitCount 计算给定字符串中被设置为 1 的比特位的数量，memcache没有有序集合
+func (mc *MemcCache) BitCount(key string, bitCount *cache.BitCount) (int64, error) {
+	return 0, errors.New("MemcCache: Memcache don't support Bit")
+}
+
 // Pipeline call pipeline command, memcache hasn't pipeline.
 func (mc *MemcCache) Pipeline(isTx bool) cache.Pipeliner {
 	return cache.Pipeliner{}

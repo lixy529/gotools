@@ -13,6 +13,10 @@ const (
 	ENCODE_LEN  = 5
 )
 
+type BitCount struct {
+	Start, End int64
+}
+
 // Cache all cache interface.
 type Cache interface {
 	Init(config string) error
@@ -29,7 +33,7 @@ type Cache interface {
 	IsExist(key string) (bool, error)
 	ClearAll() error
 
-	// Hash table operation(only redis support)
+	// 哈希表操作(redis支持)
 	HSet(key string, field string, val interface{}, expire int32) (int64, error)
 	HGet(key string, field string, val interface{}) (error, bool)
 	HDel(key string, fields ...string) error
@@ -40,7 +44,7 @@ type Cache interface {
 	HIncr(key, fields string, delta ...uint64) (int64, error)
 	HDecr(key, fields string, delta ...uint64) (int64, error)
 
-	// Set operation (only redis support)
+	// 有序集合操作(redis支持)
 	ZSet(key string, expire int32, val ...interface{}) (int64, error)
 	ZGet(key string, start, stop int, withScores bool, isRev bool) ([]string, error)
 	ZDel(key string, field ...string) (int64, error)
@@ -49,7 +53,12 @@ type Cache interface {
 	ZRemRangeByScore(key string, start, end string) (int64, error)
 	ZRemRangeByLex(key string, start, end string) (int64, error)
 
-	// pipeline
+	// 位图操作(redis支持)
+	SetBit(key string, offset int64, value int, expire int32) (int64, error)
+	GetBit(key string, offset int64) (int64, error)
+	BitCount(key string, bitCount *BitCount) (int64, error)
+
+	// pipeline(redis支持)
 	Pipeline(isTx bool) Pipeliner
 }
 
