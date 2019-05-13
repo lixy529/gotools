@@ -15,48 +15,63 @@ import (
 
 const NOT_EXIST = "redis: nil"
 
-// RedisdCache
+// RedisdCache缓存
 type RedisdCache struct {
-	connClient []*redis.Client
+	connClient []*redis.Client // 每个主机有一个连接池
 
-	addr         string        // Host and port, eg: 127.0.0.1:1900,127.0.0.2:1900.
-	auth         string        // Auth password.
-	dbNum        int           // DB number, default is 0.
-	dialTimeout  time.Duration // Connection timeout, in seconds, default 5 seconds.
-	readTimeout  time.Duration // Read timeout, in seconds, -1-No timeout，0-Use the default 3 seconds.
-	writeTimeout time.Duration // Write timeout, in seconds, default use readTimeout.
-	poolSize     int           // Number of connections per node connection pool, default is ten times the number of CPUs.
-	minIdleConns int           // Minimum number of idle connections, default is 0.
-	maxConnAge   time.Duration // Maximum connection time, in seconds, default is 0.
-	poolTimeout  time.Duration // Waiting time when all connections are busy, default is readTimeout+1.
-	idleTimeout  time.Duration // Maximum idle time, in seconds, default is 5 minutes.
+	addr         string        // 连接主机和端口，多个主机用逗号分割，如127.0.0.1:1900,127.0.0.2:1900
+	auth         string        // 授权密码
+	dbNum        int           // db编号，默认为0
+	dialTimeout  time.Duration // 连接超时时间，单位秒，默认5秒
+	readTimeout  time.Duration // 读超时时间，单位秒，-1-不超时，0-使用默认3秒
+	writeTimeout time.Duration // 写超时时间，单位秒，默认为readTimeout
+	poolSize     int           // 每个节点连接池的连接数，默认为cpu个数的10倍
+	minIdleConns int           // 最少空闲连接数，默认为0
+	maxConnAge   time.Duration // 最大连接时间，单位秒，超时时间自动关闭，默认为0
+	poolTimeout  time.Duration // 如果所有连接都忙时的等待时间，默认为readTimeout+1秒
+	idleTimeout  time.Duration // 最大空闲时间，单位秒，默认为5分钟
 
-	prefix    string // Key prefix.
-	encodeKey []byte // Encode key, length of 16 times, using Aes encryption.
+	prefix    string // key前缀，如果配置里有，则所有key前自动添加此前缀
+	encodeKey []byte // 加解密密钥，使用Aes加密，长度为16的倍数
 }
 
-// NewRedisdCache return RedisdCache object.
+// NewRedisdCache 新建一个RedisdCache适配器.
 func NewRedisdCache() cache.Cache {
 	return &RedisdCache{}
 }
 
-// Init initialization configuration.
-// Eg:
-// {
-// "addr":"127.0.0.1:19100,127.0.0.2:19100,127.0.0.3:19100",
-// "auth":"xxxx",
-// "dbNum":"1",
-// "dialTimeout":"5",
-// "readTimeout":"5",
-// "writeTimeout":"5",
-// "poolSize":"5",
-// "minIdleConns":"5",
-// "maxConnAge":"5",
-// "poolTimeout":"5",
-// "idleTimeout":"5",
-// "prefix":"le_",
-// "encodeKey":"abcdefghij123456",
-// }
+// Init 初始化
+//   参数
+//     config: 配置josn串
+//       {
+//         "addr":"127.0.0.1:19100,127.0.0.2:19100,127.0.0.3:19100",
+//         "auth":"xxxx",
+//         "dbNum":"1",
+//         "dialTimeout":"5",
+//         "readTimeout":"5",
+//         "writeTimeout":"5",
+//         "poolSize":"5",
+//         "minIdleConns":"5",
+//         "maxConnAge":"5",
+//         "poolTimeout":"5",
+//         "idleTimeout":"5",
+//         "prefix":"le_",
+//         "encodeKey":"abcdefghij123456",
+//       }
+//       addr:         连接主机和端口，多个主机用逗号分割，如127.0.0.1:1900,127.0.0.2:1900
+//       auth:         授权密码
+//       dbNum:        db编号，默认为0
+//       dialTimeout:  连接超时时间，单位秒，默认5秒
+//       readTimeout:  读超时时间，单位秒，-1-不超时，0-使用默认3秒
+//       writeTimeout: 写超时时间，单位秒，默认为readTimeout
+//       poolSize:     每个节点连接池的连接数，默认为cpu个数的10倍
+//       minIdleConns: 最少空闲连接数，默认为0
+//       maxConnAge:   最大连接时间，单位秒，超时时间自动关闭，默认为0
+//       poolTimeout:  如果所有连接都忙时的等待时间，默认为readTimeout+1秒
+//       idleTimeout:  最大空闲时间，单位秒，默认为5分钟
+//       prefix:       key前缀，如果配置里有，则所有key前自动添加此前缀
+//   返回
+//     成功时返回nil，失败返回错误信息
 func (c *RedisdCache) Init(config string) error {
 	var mapCfg map[string]string
 	var err error
@@ -66,13 +81,13 @@ func (c *RedisdCache) Init(config string) error {
 		return fmt.Errorf("RedisdCache: Unmarshal json[%s] error, %s", config, err.Error())
 	}
 
-	// Host and port
+	// 连接串
 	c.addr = mapCfg["addr"]
 
-	// Auth password
+	// 授权
 	c.auth = mapCfg["auth"]
 
-	// Connection timeout
+	// 连接超时时间
 	dialTimeout, err := strconv.Atoi(mapCfg["dialTimeout"])
 	if err != nil || dialTimeout < 0 {
 		c.dialTimeout = 5
@@ -80,7 +95,7 @@ func (c *RedisdCache) Init(config string) error {
 		c.dialTimeout = time.Duration(dialTimeout)
 	}
 
-	// Read timeout
+	// 读超时时间
 	readTimeout, err := strconv.Atoi(mapCfg["readTimeout"])
 	if err != nil {
 		c.readTimeout = 3
@@ -90,7 +105,7 @@ func (c *RedisdCache) Init(config string) error {
 		c.readTimeout = time.Duration(readTimeout)
 	}
 
-	// Write timeout
+	// 写超时时间
 	writeTimeout, err := strconv.Atoi(mapCfg["writeTimeout"])
 	if err != nil {
 		c.writeTimeout = c.readTimeout
@@ -100,7 +115,7 @@ func (c *RedisdCache) Init(config string) error {
 		c.writeTimeout = time.Duration(writeTimeout)
 	}
 
-	// Number of connections per node
+	// 每个节点连接池的连接数
 	poolSize, err := strconv.Atoi(mapCfg["poolSize"])
 	if err != nil || poolSize < 0 {
 		c.poolSize = 0
@@ -108,7 +123,7 @@ func (c *RedisdCache) Init(config string) error {
 		c.poolSize = poolSize
 	}
 
-	// Minimum number of idle connections
+	// 最少空闲连接数
 	minIdleConns, err := strconv.Atoi(mapCfg["minIdleConns"])
 	if err != nil || minIdleConns < 0 {
 		c.minIdleConns = 0
@@ -116,7 +131,7 @@ func (c *RedisdCache) Init(config string) error {
 		c.minIdleConns = minIdleConns
 	}
 
-	// Maximum connection time
+	// 最大连接时间
 	maxConnAge, err := strconv.Atoi(mapCfg["maxConnAge"])
 	if err != nil || maxConnAge < 0 {
 		c.maxConnAge = 0
@@ -124,7 +139,7 @@ func (c *RedisdCache) Init(config string) error {
 		c.maxConnAge = time.Duration(maxConnAge)
 	}
 
-	// Wait timeout
+	// 如果所有连接都忙时的等待时间
 	poolTimeout, err := strconv.Atoi(mapCfg["poolTimeout"])
 	if err != nil || poolTimeout < 0 {
 		c.poolTimeout = c.readTimeout + 1
@@ -132,7 +147,7 @@ func (c *RedisdCache) Init(config string) error {
 		c.poolTimeout = time.Duration(poolTimeout)
 	}
 
-	// Maximum idle time
+	// 最大空闲时间
 	idleTimeout, err := strconv.Atoi(mapCfg["idleTimeout"])
 	if err != nil || idleTimeout < 0 {
 		c.idleTimeout = 300
@@ -140,12 +155,12 @@ func (c *RedisdCache) Init(config string) error {
 		c.idleTimeout = time.Duration(idleTimeout)
 	}
 
-	// Key prefix
+	// 前缀
 	if prefix, ok := mapCfg["prefix"]; ok {
 		c.prefix = prefix
 	}
 
-	// Encode key
+	// 加密密钥
 	if tmp, ok := mapCfg["encodeKey"]; ok && tmp != "" {
 		c.encodeKey = []byte(tmp)
 	}
@@ -158,7 +173,7 @@ func (c *RedisdCache) Init(config string) error {
 		c.dbNum = dbNum
 	}
 
-	// connect
+	// 设置连接池
 	for _, v := range strings.Split(c.addr, ",") {
 		rp, err := c.connect(v)
 		if err != nil {
@@ -170,8 +185,13 @@ func (c *RedisdCache) Init(config string) error {
 	return nil
 }
 
-// connect create connect.
+// connect 建立连接
+//   参数
+//     host: 其中一台主机信息
+//   返回
+//     这台主机的连接池、错误信息
 func (c *RedisdCache) connect(host string) (*redis.Client, error) {
+	// 连接客户端
 	client := redis.NewClient(&redis.Options{
 		Addr:         host,
 		Password:     c.auth,
@@ -189,7 +209,12 @@ func (c *RedisdCache) connect(host string) (*redis.Client, error) {
 	return client, nil
 }
 
-// getClient return a connect.
+// getClient 获取一个连接
+// 外面调用完需要通过c.Close()放回连接池
+//   参数
+//     host: 其中一台主机信息
+//   返回
+//     这台主机的连接池
 func (c *RedisdCache) getClient() *redis.Client {
 	connCnt := len(c.connClient)
 	if connCnt == 0 {
@@ -202,17 +227,22 @@ func (c *RedisdCache) getClient() *redis.Client {
 	return c.connClient[k]
 }
 
-// Set set a cache value.
-// The expiration time is in seconds, is relative time from now , zero means the Item has no expiration time.
-// Value will be encrypt if encode is true.
+// Set 向缓存设置一个值
+//   参数
+//     key:    key值
+//     val:    value值
+//     expire: 到期是缓存过期时间，以秒为单位：从现在开始的相对时间。“0”表示项目没有到期时间。
+//     encode: 是否加密标识
+//   返回
+//     成功时返回nil，失败返回错误信息
 func (c *RedisdCache) Set(key string, val interface{}, expire int32, encode ...bool) error {
-	// conversion type
+	// 类型转换
 	data, err := cache.InterToByte(val)
 	if err != nil {
 		return err
 	}
 
-	// encode
+	// 加密判断
 	encode = append(encode, false)
 	if encode[0] {
 		data, err = cache.Encode(data, c.encodeKey)
@@ -224,11 +254,16 @@ func (c *RedisdCache) Set(key string, val interface{}, expire int32, encode ...b
 	if c.prefix != "" {
 		key = c.prefix + key
 	}
-	c.getClient().Close()
+
 	return c.getClient().Set(key, data, time.Duration(expire)*time.Second).Err()
 }
 
-// Get get a cache value.
+// Get 从缓存取一个值
+//   参数
+//     key: key值
+//     val: 保存结果地址
+//   返回
+//     错误信息，是否存在
 func (c *RedisdCache) Get(key string, val interface{}) (error, bool) {
 	if c.prefix != "" {
 		key = c.prefix + key
@@ -242,13 +277,13 @@ func (c *RedisdCache) Get(key string, val interface{}) (error, bool) {
 		return err, false
 	}
 
-	// decode
+	// 解密判断
 	data, err := cache.Decode([]byte(v), c.encodeKey)
 	if err != nil {
 		return err, true
 	}
 
-	// conversion type
+	// 类型转换
 	err = cache.ByteToInter(data, val)
 	if err != nil {
 		return err, true
@@ -257,7 +292,11 @@ func (c *RedisdCache) Get(key string, val interface{}) (error, bool) {
 	return nil, true
 }
 
-// Del delete a cache value.
+// Del 从缓存删除一个值
+//   参数
+//     key: key值
+//   返回
+//     成功时返回nil，失败返回错误信息
 func (c *RedisdCache) Del(key string) error {
 	if c.prefix != "" {
 		key = c.prefix + key
@@ -266,19 +305,23 @@ func (c *RedisdCache) Del(key string) error {
 	return c.getClient().Del(key).Err()
 }
 
-// MSet set multiple cache values.
-// The expiration time is in seconds, is relative time from now , zero means the Item has no expiration time.
-// Value will be encrypt if encode is true.
+// MSet 同时设置一个或多个key-value对
+//   参数
+//     mList:  key-value对
+//     expire: 到期是缓存过期时间，以秒为单位：从现在开始的相对时间。“0”表示项目没有到期时间。
+//     encode: 是否加密标识
+//   返回
+//     成功返回查询结果，失败返回错误信息，key不存在时对应的val为nil
 func (c *RedisdCache) MSet(mList map[string]interface{}, expire int32, encode ...bool) error {
 	var v []interface{}
 	for key, val := range mList {
-		// conversion type
+		// 类型转换
 		data, err := cache.InterToByte(val)
 		if err != nil {
 			return err
 		}
 
-		// encode
+		// 加密判断
 		encode = append(encode, false)
 		if encode[0] {
 			data, err = cache.Encode(data, c.encodeKey)
@@ -298,7 +341,7 @@ func (c *RedisdCache) MSet(mList map[string]interface{}, expire int32, encode ..
 		return err
 	}
 
-	// set expire
+	// 设置失效时间
 	if expire > 0 {
 		for key := range mList {
 			if c.prefix != "" {
@@ -311,7 +354,11 @@ func (c *RedisdCache) MSet(mList map[string]interface{}, expire int32, encode ..
 	return err
 }
 
-// MGet get multiple cache values.
+// MGet 同时获取一个或多个key的value
+//   参数
+//     keys:  要查询的key值
+//   返回
+//     成功返回查询结果，失败返回错误信息
 func (c *RedisdCache) MGet(keys ...string) (map[string]interface{}, error) {
 	mList := make(map[string]interface{})
 	args := []string{}
@@ -330,10 +377,10 @@ func (c *RedisdCache) MGet(keys ...string) (map[string]interface{}, error) {
 	i := 0
 	for _, val := range v {
 		if val == nil {
-			// not exist
+			// 不存在
 			mList[keys[i]] = nil
 		} else {
-			// decode
+			// 解密判断
 			data, err := cache.Decode([]byte(val.(string)), c.encodeKey)
 			if err != nil {
 				return mList, err
@@ -348,7 +395,11 @@ func (c *RedisdCache) MGet(keys ...string) (map[string]interface{}, error) {
 	return mList, nil
 }
 
-// MDel delete multiple cache values.
+// MDel 同时删除一个或多个key
+//   参数
+//     keys:  要查询的key值
+//   返回
+//     成功时返回nil，失败返回错误信息
 func (c *RedisdCache) MDel(keys ...string) error {
 	args := make([]string, len(keys))
 	for k, v := range keys {
@@ -362,9 +413,13 @@ func (c *RedisdCache) MDel(keys ...string) error {
 	return nil
 }
 
-// Incr atomically increments key by delta. The return value is
-// the new value after being incremented or an error.If the key
-// didn't exist will create a key and return 1.
+// Incr 缓存里的值自增
+// key不存在时会新建一个，再返回1
+//   参数
+//     key:   递增的key值
+//     delta: 递增的量
+//   返回
+//     递增后的结果，失败返回错误信息
 func (c *RedisdCache) Incr(key string, delta ...uint64) (int64, error) {
 	delta = append(delta, 1)
 	if c.prefix != "" {
@@ -378,9 +433,13 @@ func (c *RedisdCache) Incr(key string, delta ...uint64) (int64, error) {
 	return v, nil
 }
 
-// Decr atomically decrements key by delta. The return value is
-// the new value after being decremented or an error.If the key
-// didn't exist will create a key and return -1.
+// Decr 缓存里的值自减
+// key不存在时会新建一个，再返回-1
+//   参数
+//     key:   递减的key值
+//     delta: 递减的量
+//   返回
+//     递减后的结果，失败返回错误信息
 func (c *RedisdCache) Decr(key string, delta ...uint64) (int64, error) {
 	delta = append(delta, 1)
 	if c.prefix != "" {
@@ -394,7 +453,11 @@ func (c *RedisdCache) Decr(key string, delta ...uint64) (int64, error) {
 	return v, nil
 }
 
-// IsExist check the key is exists.
+// IsExist 判断key值是否存在
+//   参数
+//     key:  要查询的key值
+//   返回
+//     存在返回true，不存在返回false
 func (c *RedisdCache) IsExist(key string) (bool, error) {
 	if c.prefix != "" {
 		key = c.prefix + key
@@ -411,7 +474,11 @@ func (c *RedisdCache) IsExist(key string) (bool, error) {
 	return false, nil
 }
 
-// ClearAll delete all values.
+// ClearAll 清空所有数据
+//   参数
+//
+//   返回
+//     成功时返回nil，失败返回错误信息
 func (c *RedisdCache) ClearAll() error {
 	keys, err := c.getClient().Keys("*").Result()
 	if err != nil {
@@ -421,10 +488,16 @@ func (c *RedisdCache) ClearAll() error {
 	return c.getClient().Del(keys...).Err()
 }
 
-// Hset set hashtable value by key and field.
-// The expiration time is in seconds, is relative time from now , zero means the Item has no expiration time.
+// Hset 添加哈希表
+//   参数
+//     key:    哈希表key值
+//     field:  哈希表field值
+//     val:    哈希表value值
+//     expire: 缓存过期时间，以秒为单位：从现在开始的相对时间，“0”表示项目没有到期时间
+//   返回
+//     成功时返回添加的个数，失败返回错误信息
 func (c *RedisdCache) HSet(key string, field string, val interface{}, expire int32) (int64, error) {
-	// conversion type
+	// 类型转换
 	data, err := cache.InterToByte(val)
 	if err != nil {
 		return -1, err
@@ -446,7 +519,13 @@ func (c *RedisdCache) HSet(key string, field string, val interface{}, expire int
 	return 1, err
 }
 
-// HGet return value by key and field.
+// HGet 查询哈希表数据
+//   参数
+//     key:   哈希表key值
+//     field: 哈希表field值
+//     val:   保存结果地址
+//   返回
+//     错误信息，是否存在
 func (c *RedisdCache) HGet(key string, field string, val interface{}) (error, bool) {
 	if c.prefix != "" {
 		key = c.prefix + key
@@ -460,7 +539,7 @@ func (c *RedisdCache) HGet(key string, field string, val interface{}) (error, bo
 		return err, false
 	}
 
-	// conversion type
+	// 类型转换
 	err = cache.ByteToInter([]byte(v), val)
 	if err != nil {
 		return err, true
@@ -469,7 +548,12 @@ func (c *RedisdCache) HGet(key string, field string, val interface{}) (error, bo
 	return nil, true
 }
 
-// HDel delete hashtable.
+// HDel 删除哈希表数据
+//   参数
+//     key:   哈希表key值
+//     fields: 哈希表field值
+//   返回
+//     成功返回nil，失败返回错误信息
 func (c *RedisdCache) HDel(key string, fields ...string) error {
 	if c.prefix != "" {
 		key = c.prefix + key
@@ -478,8 +562,11 @@ func (c *RedisdCache) HDel(key string, fields ...string) error {
 	return c.getClient().HDel(key, fields...).Err()
 }
 
-// HGetAll return all values by key.
-// Require caller to call json.Unmarshal function, if type is struct or map.
+// HGetAll 返回哈希表 key 中，所有的域和值，struct、map类型需要业务层调用json.Unmarshal
+//   参数
+//     key: 有序集合key值
+//   返回
+//     查询的结果数据和错误码
 func (c *RedisdCache) HGetAll(key string) (map[string]interface{}, error) {
 	if c.prefix != "" {
 		key = c.prefix + key
@@ -502,8 +589,13 @@ func (c *RedisdCache) HGetAll(key string) (map[string]interface{}, error) {
 	return res, err
 }
 
-// HMSet set multiple key-value pairs to hash tables.
-// The expiration time is in seconds, is relative time from now , zero means the Item has no expiration time.
+// HMSet 同时将多个 field-value (域-值)对设置到哈希表 key 中
+//   参数
+//     key:    有序集合key值
+//     fields: field-value 对
+//     expire: 缓存过期时间，以秒为单位：从现在开始的相对时间，“0”表示项目没有到期时间
+//   返回
+//     执行结果
 func (c *RedisdCache) HMSet(key string, fields map[string]interface{}, expire int32) error {
 	if c.prefix != "" {
 		key = c.prefix + key
@@ -521,8 +613,12 @@ func (c *RedisdCache) HMSet(key string, fields map[string]interface{}, expire in
 	return nil
 }
 
-// HMGet return all values by key and fields.
-// Require caller to call json.Unmarshal function, if type is struct or map.
+// HMGet 返回哈希表 key 中，一个或多个给定域的值，struct、map类型需要业务层调用json.Unmarshal
+//   参数
+//     key:    有序集合key值
+//     fields: 给定域的集合
+//   返回
+//     查询的结果数据和错误码
 func (c *RedisdCache) HMGet(key string, fields ...string) (map[string]interface{}, error) {
 	if c.prefix != "" {
 		key = c.prefix + key
@@ -547,7 +643,11 @@ func (c *RedisdCache) HMGet(key string, fields ...string) (map[string]interface{
 	return res, err
 }
 
-// HVals return all field and value by key.
+// HVals 返回哈希表 key 中，所有的域和值
+//   参数
+//     key: 有序集合key值
+//   返回
+//     查询的结果数据和错误码
 func (c *RedisdCache) HVals(key string) ([]interface{}, error) {
 	vals, err := c.getClient().HVals(key).Result()
 	if err != nil {
@@ -562,8 +662,13 @@ func (c *RedisdCache) HVals(key string) ([]interface{}, error) {
 	return res, nil
 }
 
-// HIncr atomically increments key by delta.
-// The delta default is 1.
+// HIncr 哈希表的值自增
+//   参数
+//     key:    有序集合key值
+//     fields: 给定域的集合
+//     delta:  递增的量，默认为1
+//   返回
+//     递增后的结果、失败返回错误信息
 func (c *RedisdCache) HIncr(key, fields string, delta ...uint64) (int64, error) {
 	delta = append(delta, 1)
 	if c.prefix != "" {
@@ -573,8 +678,13 @@ func (c *RedisdCache) HIncr(key, fields string, delta ...uint64) (int64, error) 
 	return c.getClient().HIncrBy(key, fields, int64(delta[0])).Result()
 }
 
-// HDecr atomically decrements key by delta.
-// The delta default is 1.
+// HDecr 哈希表的值自减
+//   参数
+//     key:    有序集合key值
+//     fields: 给定域的集合
+//     delta:  递增的量，默认为1
+//   返回
+//     递减后的结果、失败返回错误信息
 func (c *RedisdCache) HDecr(key, fields string, delta ...uint64) (int64, error) {
 	delta = append(delta, 1)
 	if c.prefix != "" {
@@ -584,9 +694,13 @@ func (c *RedisdCache) HDecr(key, fields string, delta ...uint64) (int64, error) 
 	return c.getClient().HIncrBy(key, fields, 0-int64(delta[0])).Result()
 }
 
-// ZSet set one or more member elements and their score values to an ordered set.
-// The expiration time is in seconds, is relative time from now , zero means the Item has no expiration time.
-// The data is paired, with score (float64) in front and value in back.
+// ZSet 添加有序集合
+//   参数
+//     key:    有序集合key值
+//     expire: 缓存过期时间，以秒为单位：从现在开始的相对时间，“0”表示项目没有到期时间
+//     val:    有序集合值，数据为成对出来，前面为score(必须为float64), 后面为变量
+//   返回
+//     成功添加的数据和错误码
 func (c *RedisdCache) ZSet(key string, expire int32, val ...interface{}) (int64, error) {
 	valLen := len(val)
 	if valLen < 2 || valLen%2 != 0 {
@@ -617,11 +731,15 @@ func (c *RedisdCache) ZSet(key string, expire int32, val ...interface{}) (int64,
 	return n, err
 }
 
-// ZGet return values from ordered set.
-// start: Start offset, 0 for the first, - 1 for the last, - 2 for the penultimate.
-// stop: Stop offset, 0 for the first, - 1 for the last, - 2 for the penultimate.
-// withScores: return score or not.
-// isRev: true-decrement (using the ZREVRANGE), false-increment (using the ZRANGE).
+// ZGet 查询有序集合
+//   参数
+//     key:        有序集合key值
+//     start:      要查询有序集开始下标，0表示第一个，-1表示最后一个，-2表示倒数第二个
+//     stop:       要查询有序集结束下标，0表示第一个，-1表示最后一个，-2表示倒数第二个
+//     withScores: 是否带上score
+//     isRev:      true-递减排列，使用ZREVRANGE命令 false-递增排列，使用ZRANGE命令
+//   返回
+//     查询的结果数据和错误码
 func (c *RedisdCache) ZGet(key string, start, stop int, withScores bool, isRev bool) ([]string, error) {
 	var err error
 	vals := []redis.Z{}
@@ -659,7 +777,12 @@ func (c *RedisdCache) ZGet(key string, start, stop int, withScores bool, isRev b
 	return res, err
 }
 
-// ZDel delete ordered set data by key and field.
+// ZDel 删除有序集合数据
+//   参数
+//     key:   有序集合key值
+//     field: 要删除的数据
+//   返回
+//     成功删除的数据个数和错误码
 func (c *RedisdCache) ZDel(key string, field ...string) (int64, error) {
 	var args []interface{}
 	for _, f := range field {
@@ -672,7 +795,13 @@ func (c *RedisdCache) ZDel(key string, field ...string) (int64, error) {
 	return c.getClient().ZRem(key, args...).Result()
 }
 
-// ZRemRangeByRank delete ordered set data within a specified ranking interval.
+// ZRemRangeByRank 删除指定排名区间内的有序集合数据
+//   参数
+//     key:   有序集合key值
+//     start: 开始值
+//     end:   结束值
+//   返回
+//     成功删除的数据个数和错误码
 func (c *RedisdCache) ZRemRangeByRank(key string, start, end int64) (int64, error) {
 	if c.prefix != "" {
 		key = c.prefix + key
@@ -681,7 +810,13 @@ func (c *RedisdCache) ZRemRangeByRank(key string, start, end int64) (int64, erro
 	return c.getClient().ZRemRangeByRank(key, start, end).Result()
 }
 
-// ZRemRangeByScore deletes the ordered set data within the specified score interval.
+// ZRemRangeByScore 删除指定分值区间内的有序集合数据
+//   参数
+//     key:   有序集合key值
+//     start: 开始值
+//     end:   结束值
+//   返回
+//     成功删除的数据个数和错误码
 func (c *RedisdCache) ZRemRangeByScore(key string, start, end string) (int64, error) {
 	if c.prefix != "" {
 		key = c.prefix + key
@@ -690,8 +825,14 @@ func (c *RedisdCache) ZRemRangeByScore(key string, start, end string) (int64, er
 	return c.getClient().ZRemRangeByScore(key, start, end).Result()
 }
 
-// ZRemRangeByLex Delete the ordered set data in the specified variable interval.
-// Delete all elements between min and max, if all members have the same score.
+// ZRemRangeByLex 删除指定变量区间内的有序集合数据
+// 对于一个所有成员的分值都相同的有序集合键 key 来说， 这个命令会移除该集合中， 成员介于 min 和 max 范围内的所有元素。
+//   参数
+//     key:   有序集合key值
+//     start: 开始值
+//     end:   结束值
+//   返回
+//     成功删除的数据个数和错误码
 func (c *RedisdCache) ZRemRangeByLex(key string, start, end string) (int64, error) {
 	if c.prefix != "" {
 		key = c.prefix + key
@@ -700,7 +841,11 @@ func (c *RedisdCache) ZRemRangeByLex(key string, start, end string) (int64, erro
 	return c.getClient().ZRemRangeByLex(key, start, end).Result()
 }
 
-// ZCard returns the cardinality by key.
+// ZCard 返回有序集 key 的基数
+//   参数
+//     key: 有序集合key值
+//   返回
+//     有序集 key 的基数和错误码
 func (c *RedisdCache) ZCard(key string) (int64, error) {
 	if c.prefix != "" {
 		key = c.prefix + key
@@ -766,13 +911,55 @@ func (c *RedisdCache) BitCount(key string, bitCount *cache.BitCount) (int64, err
 	return c.getClient().BitCount(key, nil).Result()
 }
 
-// Pipeline call pipeline command.
-// Eg:
-//   pipe := rc.Pipeline(false).Pipe
-//   incr := pipe.Incr("pipeline_counter")
-//   pipe.Expire("pipeline_counter", time.Hour)
-//   _, err := pipe.Exec()
-//   fmt.Println(incr.Val(), err)
+// PFAdd 添加基数
+//   参数
+//     key:    HyperLogLog的key值
+//     expire: 失效时长，以秒为单位：从现在开始的相对时间，“0”表示项目没有到期时间
+//     vals:   HyperLogLog的数据
+//   返回
+//     存在，不做任何事情，返回0；不存在的话就创建，并返回1
+//     错误信息
+func (c *RedisdCache) PFAdd(key string, expire int32, vals ...interface{}) (int64, error) {
+	if c.prefix != "" {
+		key = c.prefix + key
+	}
+
+	res, err := c.getClient().PFAdd(key, vals...).Result()
+	if err != nil {
+		return res, err
+	}
+
+	if expire > 0 {
+		c.getClient().Expire(key, time.Duration(expire)*time.Second)
+	}
+
+	return res, err
+}
+
+// PFCount 返回基数估算值
+//   参数
+//     key: 位图key值，PFCount命令可以传多个key，但reddis-cluster会报错(CROSSSLOT Keys in request don't hash to the same slot.)
+//   返回
+//     基数估算值
+func (c *RedisdCache) PFCount(key string) (int64, error) {
+	if c.prefix != "" {
+		key = c.prefix + key
+	}
+
+	return c.getClient().PFCount(key).Result()
+}
+
+// Pipeline 执行pipeline命令
+//   实例：
+//     pipe := rc.Pipeline(false).Pipe
+//     incr := pipe.Incr("pipeline_counter")
+//     pipe.Expire("pipeline_counter", time.Hour)
+//     _, err := pipe.Exec()
+//     fmt.Println(incr.Val(), err)
+//   参数
+//     isTx: 是否事务模式
+//   返回
+//     成功刊返回命令执行的结果，失败返回错误信息
 func (c *RedisdCache) Pipeline(isTx bool) cache.Pipeliner {
 	p := cache.Pipeliner{}
 	if isTx {

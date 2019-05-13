@@ -15,7 +15,7 @@ func TestMemcCache(t *testing.T) {
 		return
 	}
 
-	////////////////////////string test////////////////////////////
+	////////////////////////string测试////////////////////////////
 	k1 := "k1"
 	v1 := "HelloWorld"
 	err = adapter.Set(k1, v1, 10)
@@ -71,7 +71,7 @@ func TestMemcCache(t *testing.T) {
 		return
 	}
 
-	////////////////////////int32 test////////////////////////////
+	////////////////////////int32测试////////////////////////////
 	k2 := "k2"
 	v2 := 100
 	err = adapter.Set(k2, int32(v2), 30)
@@ -90,7 +90,7 @@ func TestMemcCache(t *testing.T) {
 		return
 	}
 
-	////////////////////////float64 test////////////////////////////
+	////////////////////////float64测试////////////////////////////
 	k3 := "k3"
 	v3 := 100.01
 	err = adapter.Set(k3, v3, 30)
@@ -109,7 +109,7 @@ func TestMemcCache(t *testing.T) {
 		return
 	}
 
-	////////////////////////Incr and Decr test////////////////////////////
+	////////////////////////Incr、Decr测试////////////////////////////
 	k4 := "k4"
 	v4 := 100
 	err = adapter.Set(k4, v4, 30)
@@ -152,7 +152,7 @@ func TestMemcCache(t *testing.T) {
 		return
 	}
 
-	////////////////////////ClearAll test////////////////////////////
+	////////////////////////ClearAll测试////////////////////////////
 	err = adapter.ClearAll()
 	if err != nil {
 		t.Errorf("Memc ClearAll failed. err: %s.", err.Error())
@@ -291,7 +291,7 @@ func TestStruct2(t *testing.T) {
 	fmt.Println(sv11)
 }
 
-// TestEncode
+// TestEncode 加密测试
 func TestMemcEncode(t *testing.T) {
 	var err error
 	adapter := &MemcCache{}
@@ -381,7 +381,7 @@ func TestMemcEncode(t *testing.T) {
 	}
 }
 
-////////// IJson test /////////////
+////////// 实现IJson接口测试 /////////////
 type Item struct {
 	uid   int32
 	name  string
@@ -405,7 +405,7 @@ func (this *Item)UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-// TestMemcIJson test IJson.
+// TestMemcIJson 实现IJson接口测试
 func TestMemcIJson(t *testing.T) {
 	var err error
 	adapter := &MemcCache{}

@@ -13,7 +13,6 @@ import (
 )
 
 const (
-	NOT_EXIST               = "cache miss"
 	COMPRESSION_ZLIB        = "zlib"
 	FLAGES_INT_UNCOMPRESS   = 1
 	FLAGES_FLOAT_UNCOMPRESS = 2
@@ -21,28 +20,35 @@ const (
 	FLAGES_JSON_COMPRESS    = 54
 	FLAGES_STR_UNCOMPRESS   = 0
 	FLAGES_STR_COMPRESS     = 48
+
+	NOT_EXIST = "cache miss"
 )
 
-// MemcCache memcache cache
+// MemcCache memcache缓存
 type MemcCache struct {
 	conn      *memcache.Client
 	connCfg   []string
-	maxIdle   int           // Maximum number of idle connections, default is 2, If the value is less than 1, use the default value.
-	ioTimeOut time.Duration // IO timeout, default is 100 milliseconds, less than or equal to 0 use the default time, the unit is milliseconds.
-	prefix    string        // Key prefix.
-	encodeKey []byte        // Encode key, length of 16 times, using Aes encryption
+	maxIdle   int           // 最大空闲连接数，默认为2，如果配置值小于1则使用默认值
+	ioTimeOut time.Duration // io超时时间，默认为100毫秒，传0为默认时间，单位毫秒
+	prefix    string        // key前缀，如果配置里有，则所有key前自动添加此前缀
 
-	serializer        string // Serialization, only supports json.
-	compressType      string // Compression type, only supports zlib.
-	compressThreshold int    // Compression over size.
+	serializer        string // 序列化，目前只支持json
+	compressType      string // 压缩类型，目前只支持zlib
+	compressThreshold int    // 超过大小就进行压缩
+
+	encodeKey []byte // 加解密密钥，使用Aes加密，长度为16的倍数
 }
 
-// NewMemcCache return MemcCache object.
+// NewMemcCache 新建一个MemcCache适配器.
 func NewMemcCache() cache.Cache {
 	return &MemcCache{}
 }
 
-// connect connect memcache.
+// connect 连接memcache
+//   参数
+//     void
+//   返回
+//     成功返回nil，失败返回错误信息
 func (mc *MemcCache) connect() error {
 	if mc.conn != nil {
 		return nil
@@ -64,18 +70,21 @@ func (mc *MemcCache) connect() error {
 	return nil
 }
 
-// Init initialization configuration.
-// Eg:
-// {
-// "addr":"127.0.0.1:11211,127.0.0.2:11211",
-// "maxIdle":"3",
-// "ioTimeOut":"1",
-// "prefix":"le_",
-// "serializer":"json",
-// "compressType":"zlib",
-// "compressThreshold":"256",
-// "encodeKey":"abcdefghij123456",
-// }
+// Init 初始化
+//   参数
+//     config: 配置josn串，如:
+//       {
+//       "addr":"127.0.0.1:11211,127.0.0.2:11211",
+//       "maxIdle":"3",
+//       "ioTimeOut":"1",
+//       "prefix":"le_",
+//       "serializer":"json",
+//       "compressType":"zlib",
+//       "compressThreshold":"256",
+//       "encodeKey":"abcdefghij123456",
+//       }
+//   返回
+//     成功返回nil，失败返回错误信息
 func (mc *MemcCache) Init(config string) error {
 	var mapCfg map[string]string
 	var ok bool
@@ -104,9 +113,10 @@ func (mc *MemcCache) Init(config string) error {
 		mc.prefix = prefix
 	}
 
+	// 序列化，目前只支持json
 	mc.serializer = "json"
 
-	// Compression type, only supports zlib.
+	// 压缩，压缩类型目前只支持zlib
 	mc.compressType, _ = mapCfg["compressType"]
 	if mc.compressType != "" {
 		if mc.compressType != COMPRESSION_ZLIB {
@@ -123,7 +133,7 @@ func (mc *MemcCache) Init(config string) error {
 
 	}
 
-	// Encode key
+	// 加密密钥
 	if tmp, ok := mapCfg["encodeKey"]; ok {
 		mc.encodeKey = []byte(tmp)
 	}
@@ -136,9 +146,14 @@ func (mc *MemcCache) Init(config string) error {
 	return nil
 }
 
-// Set set a cache value.
-// The expiration time is in seconds, is relative time from now , zero means the Item has no expiration time.
-// Value will be encrypt if encode is true.
+// Set 向缓存设置一个值
+//   参数
+//     key:    key值
+//     val:    value值
+//     expire: 到期是缓存过期时间，以秒为单位，从现在开始的相对时间，“0”表示项目没有到期时间。
+//     encode: 是否加密标识
+//   返回
+//     成功时返回nil，失败返回错误信息
 func (mc *MemcCache) Set(key string, val interface{}, expire int32, encode ...bool) error {
 	if err := mc.connect(); err != nil {
 		return err
@@ -148,19 +163,19 @@ func (mc *MemcCache) Set(key string, val interface{}, expire int32, encode ...bo
 		key = mc.prefix + key
 	}
 
-	// Use Unix epoch time if expire more than 30 days.
+	// 超过30天使用Unix纪元时间
 	if expire > 86400*30 {
 		expire = int32(time.Now().Unix()) + expire
 	}
 	item := memcache.Item{Key: key, Expiration: expire}
 
-	// conversion type
+	// 类型转换
 	data, err := cache.InterToByte(val)
 	if err != nil {
 		return err
 	}
 
-	// encode
+	// 加密判断
 	encode = append(encode, false)
 	if encode[0] {
 		data, err = cache.Encode(data, mc.encodeKey)
@@ -169,7 +184,7 @@ func (mc *MemcCache) Set(key string, val interface{}, expire int32, encode ...bo
 		}
 	}
 
-	// set flags
+	// flags设置
 	flags := FLAGES_JSON_UNCOMPRESS
 	valType := ""
 	if _, ok := val.(string); ok {
@@ -189,7 +204,7 @@ func (mc *MemcCache) Set(key string, val interface{}, expire int32, encode ...bo
 		flags = FLAGES_INT_UNCOMPRESS
 	}
 
-	// compress, only supports zlib
+	// 目前只支持zlib压缩
 	if mc.compressType == COMPRESSION_ZLIB {
 		dataLen := len(data)
 		if dataLen > mc.compressThreshold {
@@ -211,7 +226,11 @@ func (mc *MemcCache) Set(key string, val interface{}, expire int32, encode ...bo
 	return mc.conn.Set(&item)
 }
 
-// Get get a cache value.
+// Get 从缓存取一个值
+//   参数
+//     key: key值
+//   返回
+//     错误信息，是否存在
 func (mc *MemcCache) Get(key string, val interface{}) (error, bool) {
 	if err := mc.connect(); err != nil {
 		return err, false
@@ -228,7 +247,7 @@ func (mc *MemcCache) Get(key string, val interface{}) (error, bool) {
 		return err, false
 	}
 
-	// uncompress
+	// 解压
 	data := item.Value
 	if item.Flags == FLAGES_JSON_COMPRESS || item.Flags == FLAGES_STR_COMPRESS {
 		data, err = utils.ZlibDecode(data[4:])
@@ -237,13 +256,13 @@ func (mc *MemcCache) Get(key string, val interface{}) (error, bool) {
 		}
 	}
 
-	// decode
+	// 解密判断
 	data, err = cache.Decode(data, mc.encodeKey)
 	if err != nil {
 		return err, true
 	}
 
-	// conversion type
+	// 类型转换
 	err = cache.ByteToInter(data, val)
 	if err != nil {
 		return err, true
@@ -252,7 +271,11 @@ func (mc *MemcCache) Get(key string, val interface{}) (error, bool) {
 	return nil, true
 }
 
-// Del delete a cache value.
+// Del 从缓存删除一个值
+//   参数
+//     key:    key值
+//   返回
+//     成功时返回nil，失败返回错误信息
 func (mc *MemcCache) Del(key string) error {
 	if err := mc.connect(); err != nil {
 		return err
@@ -270,9 +293,13 @@ func (mc *MemcCache) Del(key string) error {
 	return err
 }
 
-// MSet set multiple cache values.
-// The expiration time is in seconds, is relative time from now , zero means the Item has no expiration time.
-// Value will be encrypt if encode is true.
+// MSet 同时设置一个或多个key-value对
+//   参数
+//     mList:  key-value对
+//     expire: 到期是缓存过期时间，以秒为单位：从现在开始的相对时间。“0”表示项目没有到期时间。
+//     encode: 是否加密标识
+//   返回
+//     成功时返回nil，失败返回错误信息
 func (mc *MemcCache) MSet(mList map[string]interface{}, expire int32, encode ...bool) error {
 	for key, val := range mList {
 		err := mc.Set(key, val, expire, encode...)
@@ -283,7 +310,11 @@ func (mc *MemcCache) MSet(mList map[string]interface{}, expire int32, encode ...
 	return nil
 }
 
-// MSet get multiple cache values.
+// MSet 同时获取一个或多个key的value
+//   参数
+//     keys:  要查询的key值
+//   返回
+//     查询结果
 func (mc *MemcCache) MGet(keys ...string) (map[string]interface{}, error) {
 	mList := make(map[string]interface{})
 
@@ -303,7 +334,7 @@ func (mc *MemcCache) MGet(keys ...string) (map[string]interface{}, error) {
 	}
 
 	for key, val := range mv {
-		// uncompress
+		// 解压
 		data := val.Value
 		if val.Flags == FLAGES_JSON_COMPRESS || val.Flags == FLAGES_STR_COMPRESS {
 			data, err = utils.ZlibDecode(data[4:])
@@ -313,7 +344,7 @@ func (mc *MemcCache) MGet(keys ...string) (map[string]interface{}, error) {
 			}
 		}
 
-		// decode
+		// 解密判断
 		data, err = cache.Decode(data, mc.encodeKey)
 		if err != nil {
 			return mList, err
@@ -328,7 +359,11 @@ func (mc *MemcCache) MGet(keys ...string) (map[string]interface{}, error) {
 	return mList, nil
 }
 
-// MDel delete multiple cache values.
+// MDel 同时删除一个或多个key
+//   参数
+//     keys:  要查询的key值
+//   返回
+//     成功时返回nil，失败返回错误信息
 func (mc *MemcCache) MDel(keys ...string) error {
 	for _, key := range keys {
 		err := mc.Del(key)
@@ -339,11 +374,13 @@ func (mc *MemcCache) MDel(keys ...string) error {
 	return nil
 }
 
-// Incr atomically increments key by delta. The return value is
-// the new value after being incremented or an error. If the value
-// didn't exist in memcached the error is ErrCacheMiss. The value in
-// memcached must be an decimal number, or an error will be returned.
-// On 64-bit overflow, the new value wraps around.
+// Incr 缓存里的值自增
+// key不存在时返回NOT_FOUND错误
+//   参数
+//     key:   递增的key值
+//     delta: 递增的量
+//   返回
+//     递增后的结果，失败返回错误信息
 func (mc *MemcCache) Incr(key string, delta ...uint64) (int64, error) {
 	if err := mc.connect(); err != nil {
 		return 0, err
@@ -357,12 +394,14 @@ func (mc *MemcCache) Incr(key string, delta ...uint64) (int64, error) {
 	return int64(v), err
 }
 
-// Decr atomically decrements key by delta. The return value is
-// the new value after being decremented or an error. If the value
-// didn't exist in memcached the error is ErrCacheMiss. The value in
-// memcached must be an decimal number, or an error will be returned.
-// On underflow, the new value is capped at zero and does not wrap
-// around.
+// Decr 缓存里的值自减
+// key不存在时返回NOT_FOUND错误
+// key对应的值为0时，返回还是0
+//   参数
+//     key:   递减的key值
+//     delta: 递减的量
+//   返回
+//     递减后的结果，失败返回错误信息
 func (mc *MemcCache) Decr(key string, delta ...uint64) (int64, error) {
 	if err := mc.connect(); err != nil {
 		return 0, err
@@ -376,7 +415,11 @@ func (mc *MemcCache) Decr(key string, delta ...uint64) (int64, error) {
 	return int64(v), err
 }
 
-// IsExist check the key is exists.
+// IsExist 判断key值是否存在
+//   参数
+//     key:  要查询的key值
+//   返回
+//     存在返回true，不存在返回false
 func (mc *MemcCache) IsExist(key string) (bool, error) {
 	if err := mc.connect(); err != nil {
 		return false, err
@@ -396,7 +439,11 @@ func (mc *MemcCache) IsExist(key string) (bool, error) {
 	return true, nil
 }
 
-// ClearAll delete all values.
+// ClearAll 清空所有数据
+//   参数
+//
+//   返回
+//     成功时返回nil，失败返回错误信息
 func (mc *MemcCache) ClearAll() error {
 	if err := mc.connect(); err != nil {
 		return err
@@ -405,102 +452,112 @@ func (mc *MemcCache) ClearAll() error {
 	return mc.conn.FlushAll()
 }
 
-// Hset set hashtable value by key and field, memcache hasn't hashtable.
+// Hset 添加哈希表，memcache没有哈希表
 func (mc *MemcCache) HSet(key string, field string, val interface{}, expire int32) (int64, error) {
 	return 0, errors.New("MemcCache: Memcache don't support HSet")
 }
 
-// HGet return value by key and field, memcache hasn't hashtable.
+// HGet 查询哈希表数据，memcache没有哈希表
 func (mc *MemcCache) HGet(key string, field string, val interface{}) (error, bool) {
 	return errors.New("MemcCache: Memcache don't support HGet"), false
 }
 
-// HDel delete hashtable, memcache hasn't hashtable.
+// HDel 删除哈希表数据，memcache没有哈希表
 func (mc *MemcCache) HDel(key string, fields ...string) error {
 	return errors.New("MemcCache: Memcache don't support HDel")
 }
 
-// HGetAll return all values by key, memcache hasn't hashtable.
+// HGetAll 返回哈希表 key 中，所有的域和值，memcache没有哈希表
 func (mc *MemcCache) HGetAll(key string) (map[string]interface{}, error) {
 	return nil, errors.New("MemcCache: Memcache don't support HGetAll")
 }
 
-// HMSet set multiple key-value pairs to hash tables, memcache hasn't hashtable.
+// HMSet 同时添加多个哈希表，memcache没有哈希表
 func (c *MemcCache) HMSet(key string, fields map[string]interface{}, expire int32) error {
 	return errors.New("MemcCache: Memcache don't support HMSet")
 }
 
-// HMGet return all values by key and fields., memcache hasn't hashtable.
+// HMGet 返回哈希表 key 中，一个或多个给定域的值，memcache没有哈希表
 func (mc *MemcCache) HMGet(key string, fields ...string) (map[string]interface{}, error) {
 	return nil, errors.New("MemcCache: Memcache don't support HMGet")
 }
 
-// HVals return all field and value by key., memcache hasn't hashtable.
+// HVals 删除哈希表数据，memcache没有哈希表
 func (mc *MemcCache) HVals(key string) ([]interface{}, error) {
 	return nil, errors.New("MemcCache: Memcache don't support HVals")
 }
 
-// HIncr atomically increments key by delta, memcache hasn't hashtable.
+// HIncr 哈希表的值自增，memcache没有哈希表
 func (mc *MemcCache) HIncr(key, fields string, delta ...uint64) (int64, error) {
 	return 0, errors.New("MemcCache: Memcache don't support HIncr")
 }
 
-// HDecr atomically decrements key by delta, memcache hasn't hashtable.
+// HDecr 哈希表的值自减，memcache没有哈希表
 func (mc *MemcCache) HDecr(key, fields string, delta ...uint64) (int64, error) {
 	return 0, errors.New("MemcCache: Memcache don't support HDecr")
 }
 
-// ZSet add set, memcache hasn't set.
+// ZSet 添加有序集合，memcache没有有序集合
 func (mc *MemcCache) ZSet(key string, expire int32, val ...interface{}) (int64, error) {
 	return 0, errors.New("MemcCache: Memcache don't support ZSet")
 }
 
-// ZGet query set, memcache hasn't set.
+// ZGet 查询有序集合，memcache没有有序集合
 func (mc *MemcCache) ZGet(key string, start, stop int, withScores bool, isRev bool) ([]string, error) {
 	return nil, errors.New("MemcCache: Memcache don't support ZGet")
 }
 
-// ZDel delete set, memcache hasn't set.
+// ZDel 删除有序集合数据，memcache没有有序集合
 func (rc *MemcCache) ZDel(key string, field ...string) (int64, error) {
 	return 0, errors.New("MemcCache: Memcache don't support ZDel")
 }
 
-// ZRemRangeByRank delete set, memcache hasn't set.
+// ZRemRangeByRank 删除有序集合数据，memcache没有有序集合
 func (rc *MemcCache) ZRemRangeByRank(key string, start, end int64) (int64, error) {
 	return 0, errors.New("MemcCache: Memcache don't support ZRemRangeByRank")
 }
 
-// ZRemRangeByScore delete set, memcache hasn't set.
+// ZRemRangeByScore 删除有序集合数据，memcache没有有序集合
 func (rc *MemcCache) ZRemRangeByScore(key string, start, end string) (int64, error) {
 	return 0, errors.New("MemcCache: Memcache don't support ZRemRangeByScore")
 }
 
-// ZRemRangeByLex delete set, memcache hasn't set.
+// ZRemRangeByLex 删除有序集合数据，memcache没有有序集合
 func (rc *MemcCache) ZRemRangeByLex(key string, start, end string) (int64, error) {
 	return 0, errors.New("MemcCache: Memcache don't support ZRemRangeByLex")
 }
 
-// ZCard return set, memcache hasn't set.
+// ZCard 返回有序集 key 的基数，memcache没有有序集合
 func (mc *MemcCache) ZCard(key string) (int64, error) {
 	return 0, errors.New("MemcCache: Memcache don't support ZCard")
 }
 
-// SetBit 设置或清除指定偏移量上的位(bit)，memcache没有有序集合
+// SetBit 设置或清除指定偏移量上的位(bit)，memcache没有位图
 func (mc *MemcCache) SetBit(key string, offset int64, value int, expire int32) (int64, error) {
 	return 0, errors.New("MemcCache: Memcache don't support Bit")
 }
 
-// GetBit 获取指定偏移量上的位(bit)，memcache没有有序集合
+// GetBit 获取指定偏移量上的位(bit)，memcache没有位图
 func (mc *MemcCache) GetBit(key string, offset int64) (int64, error) {
 	return 0, errors.New("MemcCache: Memcache don't support Bit")
 }
 
-// BitCount 计算给定字符串中被设置为 1 的比特位的数量，memcache没有有序集合
+// BitCount 计算给定字符串中被设置为 1 的比特位的数量，memcache没有位图
 func (mc *MemcCache) BitCount(key string, bitCount *cache.BitCount) (int64, error) {
 	return 0, errors.New("MemcCache: Memcache don't support Bit")
 }
 
-// Pipeline call pipeline command, memcache hasn't pipeline.
+// PFAdd 添加基数(HyperLogLog)，memcache没有HyperLogLog
+func (mc *MemcCache) PFAdd(key string, expire int32, vals ...interface{}) (int64, error) {
+	return 0, errors.New("MemcCache: Memcache don't support PFAdd")
+}
+
+// PFAdd 返回基数估算值(HyperLogLog)，memcache没有HyperLogLog
+func (mc *MemcCache) PFCount(key string) (int64, error) {
+	return 0, errors.New("MemcCache: Memcache don't support PFCount")
+}
+
+// Pipeline 执行pipeline命令，memcache不支持pipeline
 func (mc *MemcCache) Pipeline(isTx bool) cache.Pipeliner {
 	return cache.Pipeliner{}
 }

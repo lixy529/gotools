@@ -18,7 +18,7 @@ func TestRedismCache(t *testing.T) {
 		return
 	}
 
-	////////////////////////string test////////////////////////////
+	////////////////////////string测试////////////////////////////
 	k1 := "k1"
 	v1 := "HelloWorld"
 	err = adapter.Set(k1, v1, 20)
@@ -74,7 +74,7 @@ func TestRedismCache(t *testing.T) {
 		return
 	}
 
-	////////////////////////int32 test////////////////////////////
+	////////////////////////int32测试////////////////////////////
 	k2 := "k2"
 	v2 := 100
 	err = adapter.Set(k2, int32(v2), 30)
@@ -93,7 +93,7 @@ func TestRedismCache(t *testing.T) {
 		return
 	}
 
-	////////////////////////float64 test////////////////////////////
+	////////////////////////float64测试////////////////////////////
 	k3 := "k3"
 	v3 := 100.01
 	err = adapter.Set(k3, v3, 30)
@@ -112,7 +112,7 @@ func TestRedismCache(t *testing.T) {
 		return
 	}
 
-	////////////////////////Incr and Decr test////////////////////////////
+	////////////////////////Incr、Decr测试////////////////////////////
 	k5 := "k5"
 	v5 := 100
 	err = adapter.Set(k5, v5, 30)
@@ -155,7 +155,7 @@ func TestRedismCache(t *testing.T) {
 		return
 	}
 
-	////////////////////////Hashtabe test////////////////////////////
+	////////////////////////哈希表测试////////////////////////////
 	k6 := "addr"
 	f6 := "google"
 	v6 := "www.google.com"
@@ -231,7 +231,7 @@ func TestRedismCache(t *testing.T) {
 		return
 	}
 
-	///////////////////////HIncr and HDecr test//////////////////////
+	///////////////////////HIncr、HDecr测试 //////////////////////
 	k7 := "count"
 	f7 := "aaa"
 	fmt.Println("=== HIncr Begin ===")
@@ -258,7 +258,7 @@ func TestRedismCache(t *testing.T) {
 		return
 	}
 
-	//////////////////////////ClearAll test////////////////////////////
+	//////////////////////////ClearAll测试////////////////////////////
 	err = adapter.ClearAll()
 	if err != nil {
 		t.Errorf("Redism ClearAll failed. err: %s.", err.Error())
@@ -358,7 +358,7 @@ func TestRedismMulti(t *testing.T) {
 	}
 }
 
-// TestRedismSet test ordered set.
+// TestRedismSet 有序集合测试
 func TestRedismSet(t *testing.T) {
 	var err error
 	adapter := &RedismCache{}
@@ -369,7 +369,7 @@ func TestRedismSet(t *testing.T) {
 	}
 
 	key := "sets"
-	// add
+	// 添加
 	n, err := adapter.ZSet(key, 60, 5, "val5", 3.5, "val3.5", 1, "100", 4, 400, 0.5, "val0.5", 1, "val1")
 	fmt.Println(n)
 	if err != nil {
@@ -377,7 +377,7 @@ func TestRedismSet(t *testing.T) {
 		return
 	}
 
-	// query, increment
+	// 查询，递增排列
 	res, err := adapter.ZGet(key, 0, -1, true, false)
 	if err != nil {
 		t.Errorf("Redis ZGet failed. err: %s.", err.Error())
@@ -385,7 +385,7 @@ func TestRedismSet(t *testing.T) {
 	}
 	fmt.Println(res)
 
-	// query, decrement
+	// 查询，递减排列
 	res, err = adapter.ZGet(key, 0, -1, true, true)
 	if err != nil {
 		t.Errorf("Redis ZGet failed. err: %s.", err.Error())
@@ -393,7 +393,7 @@ func TestRedismSet(t *testing.T) {
 	}
 	fmt.Println(res)
 
-	// cardinality
+	// 基数
 	n, err = adapter.ZCard(key)
 	if err != nil {
 		t.Errorf("Redis ZCard failed. err: %d.", n)
@@ -404,7 +404,7 @@ func TestRedismSet(t *testing.T) {
 		return
 	}
 
-	// delete
+	// 删除
 	n, err = adapter.ZDel(key, "val3.5", "400")
 	if err != nil {
 		t.Errorf("Redis ZDel failed. err: %s.", err.Error())
@@ -412,7 +412,7 @@ func TestRedismSet(t *testing.T) {
 	}
 	fmt.Println(n)
 
-	// query
+	// 查询
 	res, err = adapter.ZGet(key, 0, -1, true, false)
 	if err != nil {
 		t.Errorf("Redis ZGet failed. err: %s.", err.Error())
@@ -420,7 +420,7 @@ func TestRedismSet(t *testing.T) {
 	}
 	fmt.Println(res)
 
-	// cardinality
+	// 基数
 	n, err = adapter.ZCard(key)
 	if err != nil {
 		t.Errorf("Redis ZCard failed. err: %d.", n)
@@ -431,7 +431,7 @@ func TestRedismSet(t *testing.T) {
 	}
 }
 
-// TestZRemRangeByRank test ZRemRangeByRank function.
+// TestZRemRangeByRank 测试ZRemRangeByRank
 func TestZRemRangeByRank(t *testing.T) {
 	var err error
 	adapter := &RedismCache{}
@@ -442,7 +442,7 @@ func TestZRemRangeByRank(t *testing.T) {
 	}
 
 	key := "salary1"
-	// add
+	// 添加
 	n, err := adapter.ZSet(key, 60, 2000.0, "jack", 5000.0, "tom", 3500.0, "peter")
 	fmt.Println(n)
 	if err != nil {
@@ -450,7 +450,7 @@ func TestZRemRangeByRank(t *testing.T) {
 		return
 	}
 
-	// query
+	// 查询
 	res, err := adapter.ZGet(key, 0, -1, true, false)
 	if err != nil {
 		t.Errorf("Redis ZGet failed. err: %s.", err.Error())
@@ -458,7 +458,7 @@ func TestZRemRangeByRank(t *testing.T) {
 	}
 	fmt.Println(res)
 
-	// delete
+	// 删除
 	n, err = adapter.ZRemRangeByRank(key, 0, 1)
 	if err != nil {
 		t.Errorf("Redis ZDel failed. err: %s.", err.Error())
@@ -466,7 +466,7 @@ func TestZRemRangeByRank(t *testing.T) {
 	}
 	fmt.Println(n)
 
-	// query
+	// 查询
 	res, err = adapter.ZGet(key, 0, -1, true, false)
 	if err != nil {
 		t.Errorf("Redis ZGet failed. err: %s.", err.Error())
@@ -475,7 +475,7 @@ func TestZRemRangeByRank(t *testing.T) {
 	fmt.Println(res)
 }
 
-// TestZRemRangeByScore test ZRemRangeByScore function.
+// TestZRemRangeByScore 测试ZRemRangeByScore
 func TestZRemRangeByScore(t *testing.T) {
 	var err error
 	adapter := &RedismCache{}
@@ -486,7 +486,7 @@ func TestZRemRangeByScore(t *testing.T) {
 	}
 
 	key := "salary2"
-	// add
+	// 添加
 	n, err := adapter.ZSet(key, 60, 2000.0, "jack", 5000.0, "tom", 3500.0, "peter")
 	fmt.Println(n)
 	if err != nil {
@@ -494,7 +494,7 @@ func TestZRemRangeByScore(t *testing.T) {
 		return
 	}
 
-	// query
+	// 查询
 	res, err := adapter.ZGet(key, 0, -1, true, false)
 	if err != nil {
 		t.Errorf("Redis ZGet failed. err: %s.", err.Error())
@@ -502,7 +502,7 @@ func TestZRemRangeByScore(t *testing.T) {
 	}
 	fmt.Println(res)
 
-	// delete
+	// 删除
 	n, err = adapter.ZRemRangeByScore(key, "1500", "3500")
 	if err != nil {
 		t.Errorf("Redis ZDel failed. err: %s.", err.Error())
@@ -510,7 +510,7 @@ func TestZRemRangeByScore(t *testing.T) {
 	}
 	fmt.Println(n)
 
-	// query
+	// 查询
 	res, err = adapter.ZGet(key, 0, -1, true, false)
 	if err != nil {
 		t.Errorf("Redis ZGet failed. err: %s.", err.Error())
@@ -519,7 +519,7 @@ func TestZRemRangeByScore(t *testing.T) {
 	fmt.Println(res)
 }
 
-// TestTestZRemRangeByLex test ZRemRangeByLex function.
+// TestTestZRemRangeByLex 测试ZRemRangeByLex
 func TestZRemRangeByLex(t *testing.T) {
 	var err error
 	adapter := &RedismCache{}
@@ -530,7 +530,7 @@ func TestZRemRangeByLex(t *testing.T) {
 	}
 
 	key := "salary3"
-	// add
+	// 添加
 	n, err := adapter.ZSet(key, 60, 0.0, "aaaa", 0.0, "b", 0.0, "c", 0.0, "d", 0.0, "e")
 	fmt.Println(n)
 	if err != nil {
@@ -544,7 +544,7 @@ func TestZRemRangeByLex(t *testing.T) {
 		return
 	}
 
-	// query
+	// 查询
 	res, err := adapter.ZGet(key, 0, -1, true, false)
 	if err != nil {
 		t.Errorf("Redis ZGet failed. err: %s.", err.Error())
@@ -552,7 +552,7 @@ func TestZRemRangeByLex(t *testing.T) {
 	}
 	fmt.Println(res)
 
-	// delete
+	// 删除
 	n, err = adapter.ZRemRangeByLex(key, "[alpha", "[omega")
 	if err != nil {
 		t.Errorf("Redis ZDel failed. err: %s.", err.Error())
@@ -560,7 +560,7 @@ func TestZRemRangeByLex(t *testing.T) {
 	}
 	fmt.Println(n)
 
-	// query
+	// 查询
 	res, err = adapter.ZGet(key, 0, -1, true, false)
 	if err != nil {
 		t.Errorf("Redis ZGet failed. err: %s.", err.Error())
@@ -605,7 +605,7 @@ func TestStruct(t *testing.T) {
 		return
 	}
 
-	///////////Hashtable////////////
+	///////////哈希表////////////
 	k6 := "addr"
 	f6 := "google"
 	v6 := User{
@@ -633,7 +633,7 @@ func TestStruct(t *testing.T) {
 	}
 }
 
-// TestRedisEncode test encode and decode.
+// TestRedisEncode 加密测试
 func TestRedismEncode(t *testing.T) {
 	var err error
 	adapter := &RedismCache{}
@@ -723,7 +723,7 @@ func TestRedismEncode(t *testing.T) {
 	}
 }
 
-////////// IJson test /////////////
+////////// 实现IJson接口测试 /////////////
 type Item struct {
 	uid  int32
 	name string
@@ -747,7 +747,7 @@ func (this *Item) UnmarshalJSON(data []byte) error {
 	return nil
 }
 
-// TestRedisIJson test IJson.
+// TestRedisIJson 实现IJson接口测试
 func TestRedismIJson(t *testing.T) {
 	var err error
 	adapter := &RedismCache{}
@@ -865,6 +865,32 @@ func TestRedismBit(t *testing.T) {
 	fmt.Println("BitCount res:", res)
 }
 
+// TestRedismPf 测试HyperLogLog相关函数
+func TestRedismPf(t *testing.T) {
+	var err error
+	adapter := &RedismCache{}
+	err = adapter.Init(gConfig)
+	if err != nil {
+		t.Errorf("Redism Init failed. err: %s.", err.Error())
+		return
+	}
+
+	key := "ip_test"
+	res, err := adapter.PFAdd(key, 30, "1.1.1.1", "2.2.2.2")
+	if err != nil {
+		t.Errorf("PFAdd failed. err: %s.", err.Error())
+		return
+	}
+	fmt.Println("PFAdd res:", res)
+
+	res, err = adapter.PFCount(key)
+	if err != nil {
+		t.Errorf("PFCount failed. err: %s.", err.Error())
+		return
+	}
+	fmt.Println("PFCount res:", res)
+}
+
 // TestRedismPipeline
 func TestRedismPipeline(t *testing.T) {
 	var err error
@@ -875,7 +901,7 @@ func TestRedismPipeline(t *testing.T) {
 		return
 	}
 
-	// no transaction
+	// 非事务模式
 	pipe := adapter.Pipeline(false).Pipe
 	key := "foo"
 	r1 := pipe.Set(key, 100, 10*time.Second)
@@ -889,7 +915,7 @@ func TestRedismPipeline(t *testing.T) {
 	}
 	fmt.Println("r1:", r1.Val(), "r2:", r2.Val(), "r3:", r3.Val(), "r4:", r4.Val())
 
-	// transaction
+	// 事务模式
 	pipe = adapter.Pipeline(false).Pipe
 	r1 = pipe.Set(key, 100, 10*time.Second)
 	r2 = pipe.Get(key)

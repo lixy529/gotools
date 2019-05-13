@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 )
 
-// TestEncode test Encode与Decode function.
+// TestEncode Encode与Decode测试
 func TestEncode(t *testing.T) {
 	src := "HelloWorld!"
 	key := "123456"
@@ -27,7 +27,7 @@ func TestEncode(t *testing.T) {
 
 }
 
-// TestTo test InterToByte and ByteToInter function.
+// TestTo InterToByte和ByteToInter测试
 func TestTo(t *testing.T) {
 	fmt.Println("string start >>>")
 	sSrc1 := "HelloWorld!"
