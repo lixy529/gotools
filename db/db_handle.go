@@ -386,11 +386,19 @@ func (h *DbHandle) Begin() (*sql.Tx, error) {
 
 // Commit commit transaction, operation master database.
 func (h *DbHandle) Commit(tx *sql.Tx) error {
+	if tx == nil {
+		return nil
+	}
+	
 	return tx.Commit()
 }
 
 // Rollback rollback transaction, operation master database.
 func (h *DbHandle) Rollback(tx *sql.Tx) error {
+	if tx == nil {
+		return nil
+	}
+
 	return tx.Rollback()
 }
 
