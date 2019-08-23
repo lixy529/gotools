@@ -16,11 +16,11 @@ const (
 func CheckIp(ip string, ipv ...int) bool {
 	ipv = append(ipv, IPV4)
 
-	if ipv[0] & IPV4 == IPV4 && IsIpv4(ip) {
+	if (ipv[0]&IPV4) == IPV4 && IsIpv4(ip) {
 		return true
 	}
 
-	if ipv[0] & IPV6 == IPV6 && IsIpv6(ip) {
+	if (ipv[0]&IPV6) == IPV6 && IsIpv6(ip) {
 		return true
 	}
 

@@ -1,9 +1,9 @@
 package utils
 
 import (
-	"testing"
-	"os"
 	"fmt"
+	"os"
+	"testing"
 )
 
 // TestIsFile test IsFile function.
@@ -37,10 +37,4 @@ func TestWriteFile(t *testing.T) {
 			return
 		}
 	}
-}
-
-// TestWriteFile test WriteFile function.
-func TestFileCtime(t *testing.T) {
-	sec, nsec, err := FileCtime("./utils.go")
-	fmt.Println(sec, nsec, err)
 }
