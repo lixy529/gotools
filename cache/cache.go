@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/lixy529/gotools/utils"
 	"github.com/go-redis/redis"
+	"github.com/lixy529/gotools/utils"
 )
 
 const (

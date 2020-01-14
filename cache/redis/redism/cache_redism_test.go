@@ -1,9 +1,9 @@
 package redism
 
 import (
+	"encoding/json"
 	"fmt"
 	"testing"
-	"encoding/json"
 	"time"
 )
 

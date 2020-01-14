@@ -1,16 +1,16 @@
 package utils
 
 import (
-	"testing"
-	"fmt"
 	"encoding/json"
+	"fmt"
+	"testing"
 )
 
 // TestSha1 test Sha1
 func TestSha1(t *testing.T) {
 	str := "Hello World!"
 	sh := Sha1(str)
-	fmt.Println(sh)
+	t.Log(sh)
 }
 
 // TestHmacSha1 test Sha1 function.
@@ -21,7 +21,7 @@ func TestHmacSha1(t *testing.T) {
 	fmt.Println(sh)
 
 	sh = HmacSha1(str, key, true)
-	fmt.Println(sh)
+	t.Log(sh)
 }
 
 // TestGobEncode test GobEncode and GobDecode function.
@@ -155,7 +155,7 @@ func TestDesEncode(t *testing.T) {
 	if err != nil {
 		t.Errorf("DesDecode error. %s.", err.Error())
 		return
-	} else if (src != string(src2)) {
+	} else if src != string(src2) {
 		t.Errorf("DesDecode failed. Got %s, expected %s.", src2, src)
 		return
 	}
@@ -175,7 +175,7 @@ func TestAesEncode(t *testing.T) {
 	if err != nil {
 		t.Errorf("AesDecode error. %s.", err.Error())
 		return
-	} else if (src != string(src2)) {
+	} else if src != string(src2) {
 		t.Errorf("AesDecode failed. Got %s, expected %s.", src2, src)
 		return
 	}
@@ -185,25 +185,25 @@ func TestAesEncode(t *testing.T) {
 func TestUnicodeEncode(t *testing.T) {
 	info := `{"aa":"(✪ω✪)"}`
 	strJson := UnicodeEncode([]byte(info))
-	fmt.Println(strJson)
+	t.Log(strJson)
 	arr := make(map[string]string)
 	err := json.Unmarshal([]byte(strJson), &arr)
 	if err != nil {
 		t.Errorf("Unmarshal err: %s", err.Error())
 		return
 	}
-	fmt.Println("00:", arr)
+	t.Log("00:", arr)
 
 	info = `{"aa":"\ud83d\ude02"}`
 	json.Unmarshal([]byte(info), &arr)
-	fmt.Println("11:", arr)
+	t.Log("11:", arr)
 	b, _ := json.Marshal(arr)
 	strJson = UnicodeEncode(b)
-	fmt.Println(strJson)
+	t.Log(strJson)
 	err = json.Unmarshal([]byte(strJson), &arr)
 	if err != nil {
 		t.Errorf("Unmarshal err: %s", err.Error())
 		return
 	}
-	fmt.Println(arr)
+	t.Log(arr)
 }

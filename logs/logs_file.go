@@ -2,11 +2,11 @@
 package logs
 
 import (
-	"github.com/lixy529/gotools/utils"
 	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/lixy529/gotools/utils"
 	"io"
 	"os"
 	"path"
@@ -32,12 +32,12 @@ type FileLogs struct {
 	fullFile   string // Log file full path, sub directory[YYYYMMDD] will be created in FilePath.
 	fileWriter *os.File
 
-	MaxLines int    `json:"maxlines"` // Maximum number of lines, 0 unlimited.
-	curLines int                      // Current number of lines.
-	MaxSize  int    `json:"maxsize"`  // Maximum file size, unit M, 0 unlimited.
-	curSize  int                      // Current file size.
-	Perm     string `json:"perm"`     // File permissions.
-	openTime time.Time                // Open file time.
+	MaxLines int       `json:"maxlines"` // Maximum number of lines, 0 unlimited.
+	curLines int       // Current number of lines.
+	MaxSize  int       `json:"maxsize"` // Maximum file size, unit M, 0 unlimited.
+	curSize  int       // Current file size.
+	Perm     string    `json:"perm"` // File permissions.
+	openTime time.Time // Open file time.
 
 	Level    int  `json:"level"`
 	ShowCall bool `json:"showcall"`

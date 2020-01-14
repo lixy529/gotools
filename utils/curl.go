@@ -1,21 +1,21 @@
 package utils
 
 import (
-	"strings"
-	"net/http"
-	"net/url"
-	"time"
-	"io/ioutil"
+	"bytes"
 	"crypto/tls"
 	"crypto/x509"
-	"mime/multipart"
-	"os"
-	"bytes"
 	"io"
+	"io/ioutil"
+	"mime/multipart"
+	"net/http"
+	"net/url"
+	"os"
+	"strings"
+	"time"
 )
 
 const (
-	OPT_PROXY      = iota
+	OPT_PROXY = iota
 	OPT_HTTPHEADER
 	OPT_SSLCERT
 )

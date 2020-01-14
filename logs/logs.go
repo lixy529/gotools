@@ -81,9 +81,9 @@ func GetLevelNameById(levelId int) string {
 		return InfoName
 	} else if levelId == LevelWarn {
 		return WarnName
-	}  else if levelId == LevelError {
+	} else if levelId == LevelError {
 		return ErrorName
-	}  else if levelId == LevelFatal {
+	} else if levelId == LevelFatal {
 		return FatalName
 	}
 
@@ -98,9 +98,9 @@ func GetLevelIdByName(levelName string) int {
 		return LevelInfo
 	} else if levelName == WarnName {
 		return LevelWarn
-	}  else if levelName == ErrorName {
+	} else if levelName == ErrorName {
 		return LevelError
-	}  else if levelName == FatalName {
+	} else if levelName == FatalName {
 		return LevelFatal
 	}
 

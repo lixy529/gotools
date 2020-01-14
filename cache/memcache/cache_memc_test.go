@@ -1,9 +1,9 @@
 package memcache
 
 import (
+	"encoding/json"
 	"fmt"
 	"testing"
-	"encoding/json"
 )
 
 func TestMemcCache(t *testing.T) {
@@ -383,17 +383,17 @@ func TestMemcEncode(t *testing.T) {
 
 ////////// 实现IJson接口测试 /////////////
 type Item struct {
-	uid   int32
-	name  string
+	uid  int32
+	name string
 }
 
-func (this *Item)MarshalJSON() ([]byte, error) {
+func (this *Item) MarshalJSON() ([]byte, error) {
 	fmt.Println("Item MarshalJSON")
 	str := fmt.Sprintf(`{"uid":%d, "name":"%s"}`, this.uid, this.name)
 	return []byte(str), nil
 }
 
-func (this *Item)UnmarshalJSON(data []byte) error {
+func (this *Item) UnmarshalJSON(data []byte) error {
 	fmt.Println("Item UnmarshalJSON")
 
 	val := make(map[string]interface{})
@@ -417,7 +417,7 @@ func TestMemcIJson(t *testing.T) {
 
 	key := "k1"
 	val1 := Item{
-		uid: 1000,
+		uid:  1000,
 		name: "nick",
 	}
 	// Set
@@ -433,7 +433,7 @@ func TestMemcIJson(t *testing.T) {
 	if err != nil {
 		t.Errorf("Memc Get failed. err: %s.", err.Error())
 		return
-	} else if val1.uid != val2.uid || val1.name != val2.name  {
+	} else if val1.uid != val2.uid || val1.name != val2.name {
 		t.Errorf("Memc Get failed. Got: %d-%s expected: %d-%s.", val2.uid, val2.name, val1.uid, val1.name)
 		return
 	}

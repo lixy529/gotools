@@ -1,9 +1,9 @@
 package redisd
 
 import (
-	"testing"
-	"fmt"
 	"encoding/json"
+	"fmt"
+	"testing"
 	"time"
 )
 

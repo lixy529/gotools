@@ -97,7 +97,7 @@ func (c *Config) parseOne(filePath string) error {
 		case string(realLine[0]) == "#": // comment
 			realLine = ""
 		case realLine[0] == '[' && realLine[len(realLine)-1] == ']':
-			section = strings.ToUpper(strings.TrimSpace(realLine[1: len(realLine)-1]))
+			section = strings.ToUpper(strings.TrimSpace(realLine[1 : len(realLine)-1]))
 			c.configList[section] = make(map[string]string)
 			realLine = ""
 		case n > 8 && realLine[0:8] == Inc_Str: // include
@@ -116,7 +116,7 @@ func (c *Config) parseOne(filePath string) error {
 				continue
 			}
 			key := strings.ToUpper(strings.TrimSpace(tmpLine[0:i]))
-			value := strings.TrimSpace(tmpLine[i+1: len(tmpLine)])
+			value := strings.TrimSpace(tmpLine[i+1 : len(tmpLine)])
 			c.configList[section][key] = value
 		}
 	}

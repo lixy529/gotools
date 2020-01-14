@@ -3,24 +3,24 @@ package utils
 import (
 	"bytes"
 	"compress/zlib"
-	"crypto/md5"
-	"encoding/gob"
-	"encoding/hex"
-	"io/ioutil"
-	"crypto/rand"
-	"crypto/rsa"
-	"crypto/x509"
-	"encoding/pem"
-	"errors"
-	"encoding/base64"
-	"strings"
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/des"
-	"crypto/sha1"
 	"crypto/hmac"
-	"strconv"
+	"crypto/md5"
+	"crypto/rand"
+	"crypto/rsa"
+	"crypto/sha1"
+	"crypto/x509"
+	"encoding/base64"
+	"encoding/gob"
+	"encoding/hex"
+	"encoding/pem"
+	"errors"
 	"fmt"
+	"io/ioutil"
+	"strconv"
+	"strings"
 )
 
 const (
@@ -365,7 +365,7 @@ func UnicodeEncode(b []byte) string {
 		// Double byte
 		i++
 		if i >= strLen {
-			break;
+			break
 		}
 		c2 := int64(b[i])
 		if c1&32 == 0 {
@@ -376,7 +376,7 @@ func UnicodeEncode(b []byte) string {
 		// Triple
 		i++
 		if i >= strLen {
-			break;
+			break
 		}
 		c3 := int64(b[i])
 		if c1&16 == 0 {
@@ -387,7 +387,7 @@ func UnicodeEncode(b []byte) string {
 		// Quadruple
 		i++
 		if i >= strLen {
-			break;
+			break
 		}
 		c4 := int64(b[i])
 		if c1&8 == 0 {

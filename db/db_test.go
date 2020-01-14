@@ -1,7 +1,6 @@
 package db
 
 import (
-	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	"testing"
 )
@@ -41,7 +40,7 @@ func TestDb(t *testing.T) {
 		t.Errorf("handle.FetchOne error, [%s]", err.Error())
 		return
 	}
-	fmt.Println(res)
+	t.Log(res)
 
 	// FetchAll
 	res1, err := h.FetchAll("select * from t_test")
@@ -50,7 +49,7 @@ func TestDb(t *testing.T) {
 		return
 	}
 	for _, val := range *res1 {
-		fmt.Println(val)
+		t.Log(val)
 	}
 
 	dbBase.Close()

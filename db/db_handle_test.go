@@ -1,7 +1,6 @@
 package db
 
 import (
-	"fmt"
 	_ "github.com/go-sql-driver/mysql"
 	"testing"
 )
@@ -24,7 +23,7 @@ func TestDbHandle(t *testing.T) {
 		t.Errorf("handle.Insert error, [%s]", err.Error())
 		return
 	}
-	fmt.Printf("userId = %d\n", userId)
+	t.Logf("userId = %d\n", userId)
 
 	// FetchOne
 	res, err := h.FetchOne("select * from t_test where name=?", "lixy")
@@ -32,7 +31,7 @@ func TestDbHandle(t *testing.T) {
 		t.Errorf("handle.FetchOne error, [%s]", err.Error())
 		return
 	}
-	fmt.Println(res)
+	t.Log(res)
 
 	// FetchAll
 	res1, err := h.FetchAll("select * from t_test")
@@ -41,7 +40,7 @@ func TestDbHandle(t *testing.T) {
 		return
 	}
 	for _, val := range *res1 {
-		fmt.Println(val)
+		t.Log(val)
 	}
 
 	// Exec update
@@ -50,7 +49,7 @@ func TestDbHandle(t *testing.T) {
 		t.Errorf("handle.Insert error, [%s]", err.Error())
 		return
 	}
-	fmt.Printf("cnt = %d\n", cnt)
+	t.Logf("cnt = %d\n", cnt)
 
 	// FetchOneMaster
 	res, err = h.FetchOneMaster("select * from t_test where name=?", "lixy")
@@ -58,7 +57,7 @@ func TestDbHandle(t *testing.T) {
 		t.Errorf("handle.FetchOneMaster error, [%s]", err.Error())
 		return
 	}
-	fmt.Println(res)
+	t.Log(res)
 
 	// FetchAllMaster
 	res1, err = h.FetchAllMaster("select * from t_test where name=?", "lixy")
@@ -66,7 +65,7 @@ func TestDbHandle(t *testing.T) {
 		t.Errorf("handle.FetchAllMaster error, [%s]", err.Error())
 		return
 	}
-	fmt.Println(res)
+	t.Log(res)
 
 	// Exec delete
 	cnt, err = h.Exec("delete from t_test where name=?", "demo")
@@ -74,7 +73,7 @@ func TestDbHandle(t *testing.T) {
 		t.Errorf("handle.Exec error, [%s]", err.Error())
 		return
 	}
-	fmt.Printf("cnt = %d\n", cnt)
+	t.Logf("cnt = %d\n", cnt)
 }
 
 // TestTxDbHandle test transaction.
@@ -90,7 +89,7 @@ func TestTxDbHandle(t *testing.T) {
 
 	///////////////////////////////////Insert///////////////////////////////////////
 
-	fmt.Println("/////////TxInsert///////////")
+	t.Log("/////////TxInsert///////////")
 	tx, err := h.Begin()
 	if err != nil {
 		t.Errorf("handle.Begin error, [%s]", err.Error())
@@ -104,7 +103,7 @@ func TestTxDbHandle(t *testing.T) {
 		t.Errorf("handle.TxInsert error, [%s]", err.Error())
 		return
 	}
-	fmt.Printf("userId = %d\n", userId)
+	t.Logf("userId = %d\n", userId)
 
 	// FetchOne
 	res, err := h.TxFetchOne(tx, "select * from t_test where name=?", "txTest")
@@ -112,12 +111,12 @@ func TestTxDbHandle(t *testing.T) {
 		t.Errorf("handle.FetchOne11 error, [%s]", err.Error())
 		return
 	}
-	fmt.Println(res)
+	t.Log(res)
 	h.Commit(tx)
 
 	////////////////////////////////////Update//////////////////////////////////////
 
-	fmt.Println("/////////TxExec Update///////////")
+	t.Log("/////////TxExec Update///////////")
 	tx, err = h.Begin()
 	if err != nil {
 		t.Errorf("handle.Begin error, [%s]", err.Error())
@@ -131,7 +130,7 @@ func TestTxDbHandle(t *testing.T) {
 		t.Errorf("handle.Insert error, [%s]", err.Error())
 		return
 	}
-	fmt.Printf("cnt = %d\n", cnt)
+	t.Logf("cnt = %d\n", cnt)
 
 	// FetchOne
 	res, err = h.TxFetchOne(tx, "select * from t_test where name=?", "txTest")
@@ -139,11 +138,11 @@ func TestTxDbHandle(t *testing.T) {
 		t.Errorf("handle.FetchOne error, [%s]", err.Error())
 		return
 	}
-	fmt.Println(res)
+	t.Log(res)
 	h.Commit(tx)
 
 	////////////////////////////////////Delete//////////////////////////////////////
-	fmt.Println("/////////TxExec Delete///////////")
+	t.Log("/////////TxExec Delete///////////")
 	tx, err = h.Begin()
 	if err != nil {
 		t.Errorf("handle.Begin error, [%s]", err.Error())
@@ -157,7 +156,7 @@ func TestTxDbHandle(t *testing.T) {
 		t.Errorf("handle.TxExec error, [%s]", err.Error())
 		return
 	}
-	fmt.Printf("cnt = %d\n", cnt)
+	t.Logf("cnt = %d\n", cnt)
 
 	// FetchOne
 	res, err = h.TxFetchOne(tx, "select * from t_test where name=?", "txTest")
@@ -166,11 +165,11 @@ func TestTxDbHandle(t *testing.T) {
 		return
 	}
 	h.Commit(tx)
-	fmt.Println(res)
+	t.Log(res)
 
 	///////////////////////////////////TxFetchAll///////////////////////////////////////
 
-	fmt.Println("/////////TxFetchAll///////////")
+	t.Log("/////////TxFetchAll///////////")
 	tx, err = h.Begin()
 	if err != nil {
 		t.Errorf("handle.Begin error, [%s]", err.Error())
@@ -184,7 +183,7 @@ func TestTxDbHandle(t *testing.T) {
 		t.Errorf("handle.TxExec error, [%s]", err.Error())
 		return
 	}
-	fmt.Printf("cnt = %d\n", cnt)
+	t.Logf("cnt = %d\n", cnt)
 
 	// TxFetchAll
 	res1, err := h.TxFetchAll(tx, "select * from t_test")
@@ -193,7 +192,7 @@ func TestTxDbHandle(t *testing.T) {
 		return
 	}
 	for _, val := range *res1 {
-		fmt.Println(val)
+		t.Log(val)
 	}
 
 	h.Rollback(tx)

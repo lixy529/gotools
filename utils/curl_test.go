@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"fmt"
 	"testing"
 )
 
@@ -17,7 +16,7 @@ func TestGet(t *testing.T) {
 		t.Errorf("Curl failed. err: %s.", err.Error())
 		return
 	}
-	fmt.Println(res, status)
+	t.Log(res, status)
 }
 
 // TestPost test Curl function
@@ -32,7 +31,7 @@ func TestPost(t *testing.T) {
 		t.Errorf("Curl failed. err: %s.", err.Error())
 		return
 	}
-	fmt.Println(res, status)
+	t.Log(res, status)
 }
 
 // TestPost test Curl function
@@ -48,7 +47,7 @@ func TestProxy(t *testing.T) {
 		t.Errorf("Curl failed. err: %s.", err.Error())
 		return
 	}
-	fmt.Println(res, status)
+	t.Log(res, status)
 }
 
 // TestPost test Curl function
@@ -62,7 +61,7 @@ func TestProxy1(t *testing.T) {
 		t.Errorf("Curl failed. err: %s.", err.Error())
 		return
 	}
-	fmt.Println(res, status)
+	t.Log(res, status)
 }
 
 // TestPost test Curl function
@@ -82,7 +81,7 @@ func TestCurl3(t *testing.T) {
 		t.Errorf("Curl error: %s.", err.Error())
 		return
 	}
-	fmt.Println(res, status)
+	t.Log(res, status)
 }
 
 // TestPostFile test PostFile function
@@ -99,5 +98,5 @@ func TestPostFile(t *testing.T) {
 		t.Errorf("PostFile error: %s.", err.Error())
 		return
 	}
-	fmt.Println(res, status)
+	t.Log(res, status)
 }

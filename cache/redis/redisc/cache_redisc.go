@@ -2,14 +2,14 @@
 package redisc
 
 import (
-	"github.com/lixy529/gotools/cache"
-	"github.com/go-redis/redis"
 	"encoding/json"
-	"fmt"
-	"strconv"
-	"time"
-	"strings"
 	"errors"
+	"fmt"
+	"github.com/go-redis/redis"
+	"github.com/lixy529/gotools/cache"
+	"strconv"
+	"strings"
+	"time"
 )
 
 const NOT_EXIST = "redis: nil"

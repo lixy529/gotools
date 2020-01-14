@@ -2,9 +2,9 @@
 package logs
 
 import (
-	"github.com/lixy529/gotools/utils"
 	"encoding/json"
 	"fmt"
+	"github.com/lixy529/gotools/utils"
 )
 
 type ConsoleLogs struct {

@@ -2,7 +2,6 @@ package utils
 
 import (
 	"testing"
-	"fmt"
 )
 
 // TestIpItoa test IpItoa function
@@ -103,11 +102,11 @@ func TestMapToUrlQuery(t *testing.T) {
 
 	// MapToUrlQuery
 	str := MapToUrlQuery(m1)
-	fmt.Println(str)
+	t.Log(str)
 
 	// UrlQueryToMap
 	m2, err := UrlQueryToMap(str)
-	fmt.Println(m2)
+	t.Log(m2)
 	if err != nil {
 		t.Errorf("GetString error. %s.", err.Error())
 		return

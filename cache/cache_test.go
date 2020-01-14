@@ -1,9 +1,9 @@
 package cache
 
 import (
-	"testing"
-	"fmt"
 	"encoding/json"
+	"fmt"
+	"testing"
 )
 
 // TestEncode Encode与Decode测试
@@ -107,8 +107,8 @@ func TestTo(t *testing.T) {
 	////////////////////////////////////////////////
 	fmt.Println("struct1 start >>>")
 	type user1 struct {
-		Uid   int32
-		Name  string
+		Uid  int32
+		Name string
 	}
 	stSrc := user1{
 		Uid:  100,
@@ -126,7 +126,7 @@ func TestTo(t *testing.T) {
 		t.Errorf("Decode failed. err: %s.", err.Error())
 		return
 	} else if stSrc.Uid != stDst.Uid || stSrc.Name != stDst.Name {
-		t.Errorf("Redis Get failed. Got %d-%s, expected %d-%s.", stDst.Uid, stDst.Name, stSrc.Uid,stSrc.Name)
+		t.Errorf("Redis Get failed. Got %d-%s, expected %d-%s.", stDst.Uid, stDst.Name, stSrc.Uid, stSrc.Name)
 		return
 	}
 
@@ -148,24 +148,24 @@ func TestTo(t *testing.T) {
 		t.Errorf("Decode failed. err: %s.", err.Error())
 		return
 	} else if stSrc2.Uid != stDst2.Uid || stSrc2.Name != stDst2.Name {
-		t.Errorf("Redis Get failed. Got %d-%s, expected %d-%s.", stDst2.Uid, stDst2.Name, stSrc2.Uid,stSrc2.Name)
+		t.Errorf("Redis Get failed. Got %d-%s, expected %d-%s.", stDst2.Uid, stDst2.Name, stSrc2.Uid, stSrc2.Name)
 		return
 	}
 }
 
 type user2 struct {
-	Uid   int32
-	Name  string
+	Uid  int32
+	Name string
 }
 
-func (this *user2)MarshalJSON() ([]byte, error) {
+func (this *user2) MarshalJSON() ([]byte, error) {
 	fmt.Println("user2 MarshalJSON")
 
 	str := fmt.Sprintf(`{"uid":%d, "name":"%s"}`, this.Uid, this.Name)
 	return []byte(str), nil
 }
 
-func (this *user2)UnmarshalJSON(data []byte) error {
+func (this *user2) UnmarshalJSON(data []byte) error {
 	fmt.Println("user2 UnmarshalJSON")
 
 	val := make(map[string]interface{})

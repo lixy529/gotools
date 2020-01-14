@@ -389,7 +389,7 @@ func (h *DbHandle) Commit(tx *sql.Tx) error {
 	if tx == nil {
 		return nil
 	}
-	
+
 	return tx.Commit()
 }
 

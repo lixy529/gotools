@@ -5,9 +5,9 @@ import (
 	"encoding/binary"
 	"math"
 	"net"
+	"net/url"
 	"strconv"
 	"strings"
-	"net/url"
 )
 
 // IpItoa IP integer to string.
@@ -73,7 +73,6 @@ func ByteToInt32(b []byte, isBig bool) int32 {
 }
 
 // Int64ToByte int64 to []byte.
-// "isBig" is true if big endian is required, otherwise is false.
 func Int64ToByte(i int64, isBig bool) []byte {
 	bBuf := bytes.NewBuffer([]byte{})
 	if isBig {
@@ -86,7 +85,6 @@ func Int64ToByte(i int64, isBig bool) []byte {
 }
 
 // ByteToInt64 []byte to int64.
-// "isBig" is true if big endian is required, otherwise is false.
 func ByteToInt64(b []byte, isBig bool) int64 {
 	bBuf := bytes.NewBuffer(b)
 	var i int64
@@ -100,7 +98,6 @@ func ByteToInt64(b []byte, isBig bool) int64 {
 }
 
 // Float32ToByte foat32 to []byte.
-// "isBig" is true if big endian is required, otherwise is false.
 func Float32ToByte(f float32, isBig bool) []byte {
 	bits := math.Float32bits(f)
 	bs := make([]byte, 4)
@@ -114,7 +111,6 @@ func Float32ToByte(f float32, isBig bool) []byte {
 }
 
 // ByteToFloat32 []byte to int32.
-// "isBig" is true if big endian is required, otherwise is false.
 func ByteToFloat32(b []byte, isBig bool) float32 {
 	var bits uint32
 	if isBig {
@@ -141,7 +137,6 @@ func Float64ToByte(f float64, isBig bool) []byte {
 }
 
 // ByteToFloat64 []byte to int64.
-// "isBig" is true if big endian is required, otherwise is false.
 func ByteToFloat64(b []byte, isBig bool) float64 {
 	var bits uint64
 	if isBig {

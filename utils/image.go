@@ -1,12 +1,12 @@
 package utils
 
 import (
-	"image"
-	"os"
-	"image/jpeg"
 	"fmt"
-	"image/png"
+	"image"
 	"image/gif"
+	"image/jpeg"
+	"image/png"
+	"os"
 	"strings"
 )
 
@@ -16,7 +16,7 @@ func GetImageType(imgContent []byte) string {
 	if len(imgContent) < 4 {
 		return ""
 	}
-	
+
 	if imgContent[0] == 137 && imgContent[1] == 80 {
 		return "PNG"
 	} else if imgContent[0] == 255 && imgContent[1] == 216 {

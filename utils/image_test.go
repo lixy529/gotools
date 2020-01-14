@@ -1,8 +1,8 @@
 package utils
 
 import (
-	"testing"
 	"io/ioutil"
+	"testing"
 )
 
 // TestGetImageType 测试获取图片类型
@@ -33,7 +33,7 @@ func TestTranImage(t *testing.T) {
 	}
 
 	// create image
-	err =  EncodeImage(dstFile, img, "PNG")
+	err = EncodeImage(dstFile, img, "PNG")
 	if err != nil {
 		t.Errorf("EncodeImage err: %s", err.Error())
 		return

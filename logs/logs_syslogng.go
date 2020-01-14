@@ -2,16 +2,16 @@
 package logs
 
 import (
-	"github.com/lixy529/gotools/utils"
 	"container/list"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/lixy529/gotools/utils"
 	"net"
 	"os"
+	"strings"
 	"sync"
 	"time"
-	"strings"
 )
 
 const (
@@ -25,8 +25,8 @@ const (
 
 // SyslogNgLogs
 type SyslogNgLogs struct {
-	Addr        string        `json:"addr"`        // syslog address, sock file or ip and port(ip:port)
-	addrType    string                             // address type, tcp or unix
+	Addr        string        `json:"addr"` // syslog address, sock file or ip and port(ip:port)
+	addrType    string        // address type, tcp or unix
 	LocalFile   string        `json:"localfile"`   // Write local files when an exception occurs
 	MaxConns    int           `json:"maxconns"`    // Maximum number of connections, default is 0, 0 is unlimited, if less than 0, don't use pool.
 	MaxIdle     int           `json:"maxidle"`     // Maximum number of idle connections, default is 100, 0 is unlimited.

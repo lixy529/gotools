@@ -1,9 +1,9 @@
 package redisc
 
 import (
+	"encoding/json"
 	"fmt"
 	"testing"
-	"encoding/json"
 	"time"
 )
 
